@@ -1,7 +1,18 @@
 <?php
 // Login page for Admin, Staff, and User
 session_start();
+require_once '../config/error_handler.php';
 require_once '../config/db.php';
+require_once '../config/db_check.php';
+
+// Check if required tables exist
+if (!checkTableExists('User') || !checkTableExists('Admin') || !checkTableExists('Staff')) {
+    $missing = [];
+    if (!checkTableExists('User')) $missing[] = 'User';
+    if (!checkTableExists('Admin')) $missing[] = 'Admin';
+    if (!checkTableExists('Staff')) $missing[] = 'Staff';
+    die(showTableError(implode(', ', $missing), 'User Login'));
+}
 
 $login_err = '';
 
@@ -81,13 +92,22 @@ if ($conn->connect_error) {
                             $user_found = true;
                         } else {
                             $login_err = 'Invalid password.';
+                            $login_err .= "<br><small>Email: $email</small>";
                         }
                     } else {
                         if (empty($login_err)) {
                             $login_err = 'No account found for this email.';
+                            $login_err .= "<br><small>Email: $email</small>";
                         }
                     }
-                    $stmt->close();
+                    if ($stmt) $stmt->close();
+                } else {
+                    if (empty($login_err)) {
+                        $login_err = showDbError($conn, "User Login Query");
+                        $login_err .= "<strong>Query Details:</strong><br>";
+                        $login_err .= "Email: $email<br>";
+                        $login_err .= "Table: User";
+                    }
                 }
             }
             

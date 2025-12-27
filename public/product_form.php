@@ -4,7 +4,14 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'staf
     header('Location: login.php');
     exit;
 }
+require_once '../config/error_handler.php';
 require_once '../config/db.php';
+require_once '../config/db_check.php';
+
+// Check if Product table exists
+if (!checkTableExists('Product')) {
+    die(showTableError('Product', 'Product Management'));
+}
 
 $isEdit = isset($_GET['edit']);
 $message = '';
@@ -42,11 +49,16 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                     header('Location: manage_products.php?msg=updated');
                     exit;
                 } else {
-                    $message = 'Update failed: ' . $conn->error;
+                    $message = showDbError($conn, "Product Update");
+                    $message .= "<strong>Update Details:</strong><br>";
+                    $message .= "Product ID: $id<br>";
+                    $message .= "Name: $name<br>";
+                    $message .= "Price: $price<br>";
+                    $message .= "Quantity: $qty<br>";
                 }
                 $stmt->close();
             } else {
-                $message = 'Database error: ' . $conn->error;
+                $message = showDbError($conn, "Preparing UPDATE statement");
             }
         } else {
             // Insert new product
@@ -58,11 +70,18 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                     header('Location: manage_products.php?msg=added');
                     exit;
                 } else {
-                    $message = 'Insert failed: ' . $conn->error;
+                    $message = showDbError($conn, "Product Insert");
+                    $message .= "<strong>Insert Details:</strong><br>";
+                    $message .= "Name: $name<br>";
+                    $message .= "Description: " . substr($desc, 0, 50) . "...<br>";
+                    $message .= "Price: $price<br>";
+                    $message .= "Warranty: $warranty months<br>";
+                    $message .= "Quantity: $qty<br>";
+                    $message .= "Admin ID: $admin_id<br>";
                 }
                 $stmt->close();
             } else {
-                $message = 'Database error: ' . $conn->error;
+                $message = showDbError($conn, "Preparing INSERT statement");
             }
         }
     } else {
@@ -85,7 +104,16 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             </div>
             <div class="card-body">
                 <?php if ($message): ?>
-                    <div class="alert alert-info"><?= $message ?></div>
+                    <div class="alert alert-<?=strpos($message, 'successfully') !== false ? 'success' : 'danger'?>">
+                        <?php 
+                        // Check if it's already HTML formatted (from showDbError)
+                        if (strpos($message, '<div') !== false || strpos($message, '<strong') !== false) {
+                            echo $message;
+                        } else {
+                            echo htmlspecialchars($message);
+                        }
+                        ?>
+                    </div>
                 <?php endif; ?>
                 <form method="POST">
                     <input type="hidden" name="product_id" value="<?= htmlspecialchars($p['product_id']) ?>" />

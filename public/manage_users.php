@@ -4,7 +4,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: login.php');
     exit;
 }
+require_once '../config/error_handler.php';
 require_once '../config/db.php';
+require_once '../config/db_check.php';
+
+// Check if User table exists
+if (!checkTableExists('User')) {
+    die(showTableError('User', 'User Management'));
+}
 
 $msg = '';
 if (isset($_GET['msg'])) {

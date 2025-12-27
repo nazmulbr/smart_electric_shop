@@ -4,7 +4,14 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin','staff
     header('Location: login.php');
     exit;
 }
+require_once '../config/error_handler.php';
 require_once '../config/db.php';
+require_once '../config/db_check.php';
+
+// Check if Product table exists
+if (!checkTableExists('Product')) {
+    die(showTableError('Product', 'Product Management'));
+}
 
 $msg = '';
 if (isset($_GET['msg'])) {
@@ -21,11 +28,13 @@ if (isset($_GET['delete'])) {
             header('Location: manage_products.php?msg=deleted');
             exit;
         } else {
-            $msg = 'Delete failed: ' . $conn->error;
+            $msg = showDbError($conn, "Product Deletion");
+            $msg .= "<strong>Delete Details:</strong><br>";
+            $msg .= "Product ID: $pid<br>";
         }
         $stmt->close();
     } else {
-        $msg = 'Database error: ' . $conn->error;
+        $msg = showDbError($conn, "Preparing DELETE statement");
     }
 }
 
@@ -35,7 +44,8 @@ $result = $conn->query('SELECT * FROM Product ORDER BY product_id DESC');
 if ($result) {
     $products = $result->fetch_all(MYSQLI_ASSOC);
 } else {
-    $msg = 'Error loading products: ' . $conn->error;
+    $msg = showDbError($conn, "Loading Products");
+    $msg .= "<strong>Query:</strong> SELECT * FROM Product ORDER BY product_id DESC<br>";
 }
 ?>
 <!DOCTYPE html>
@@ -48,7 +58,16 @@ if ($result) {
     <div class="container mt-4">
         <h4>Product Management</h4>
         <?php if ($msg): ?>
-            <div class="alert alert-<?=strpos($msg, 'failed') !== false || strpos($msg, 'Error') !== false ? 'danger' : 'success'?>"><?=htmlspecialchars($msg)?></div>
+            <div class="alert alert-<?=strpos($msg, 'failed') !== false || strpos($msg, 'Error') !== false ? 'danger' : 'success'?>">
+                <?php 
+                // Check if it's already HTML formatted (from showDbError)
+                if (strpos($msg, '<div') !== false || strpos($msg, '<strong') !== false) {
+                    echo $msg;
+                } else {
+                    echo htmlspecialchars($msg);
+                }
+                ?>
+            </div>
         <?php endif; ?>
         <div class="mb-2">
             <a href="admin_dashboard.php" class="btn btn-secondary">Back to Dashboard</a>

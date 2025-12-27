@@ -1,7 +1,14 @@
 <?php
 // User Registration Page
 session_start();
+require_once '../config/error_handler.php';
 require_once '../config/db.php';
+require_once '../config/db_check.php';
+
+// Check if User table exists
+if (!checkTableExists('User')) {
+    die(showTableError('User', 'User Registration'));
+}
 
 $register_err = '';
 $register_msg = '';
@@ -46,18 +53,23 @@ if ($conn->connect_error) {
                                 // Clear form data
                                 $name = $email = $phone_number = '';
                             } else {
-                                $register_err = 'Registration failed: ' . $conn->error;
+                                $register_err = showDbError($conn, "User Registration");
+                                $register_err .= "<strong>Details:</strong><br>";
+                                $register_err .= "Error Code: " . $conn->errno . "<br>";
+                                $register_err .= "SQL State: " . $conn->sqlstate . "<br>";
+                                $register_err .= "Attempted Query: INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?)<br>";
+                                $register_err .= "Parameters: name='$name', email='$email', phone='$phone_number'";
                             }
                             $insert_stmt->close();
                         } else {
-                            $register_err = 'Database error: ' . $conn->error;
+                            $register_err = showDbError($conn, "Preparing INSERT statement");
                         }
                     } else {
                         $register_err = 'Email already registered. Please use a different email.';
                         $check_stmt->close();
                     }
                 } else {
-                    $register_err = 'Database error: ' . $conn->error;
+                    $register_err = showDbError($conn, "Checking for existing user");
                 }
             }
         } else {
@@ -78,7 +90,16 @@ if ($conn->connect_error) {
             <div class="col-md-5">
                 <h3 class="text-center">User Registration</h3>
                 <?php if ($register_err): ?>
-                    <div class="alert alert-danger"><?=$register_err?></div>
+                    <div class="alert alert-danger">
+                        <?php 
+                        // Check if it's already HTML formatted (from showDbError)
+                        if (strpos($register_err, '<div') !== false || strpos($register_err, '<strong') !== false) {
+                            echo $register_err;
+                        } else {
+                            echo htmlspecialchars($register_err);
+                        }
+                        ?>
+                    </div>
                 <?php elseif ($register_msg): ?>
                     <div class="alert alert-success"><?=$register_msg?></div>
                 <?php endif; ?>

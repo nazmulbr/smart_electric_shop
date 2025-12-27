@@ -4,7 +4,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: login.php');
     exit;
 }
+require_once '../config/error_handler.php';
 require_once '../config/db.php';
+require_once '../config/db_check.php';
+
+// Check if User table exists
+if (!checkTableExists('User')) {
+    die(showTableError('User', 'User Management'));
+}
 
 $isEdit = isset($_GET['edit']);
 $message = '';
@@ -42,11 +49,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         header('Location: manage_users.php?msg=updated');
                         exit;
                     } else {
-                        $message = 'Update failed: ' . $conn->error;
+                        $message = showDbError($conn, "User Update");
+                        $message .= "<strong>Update Details:</strong><br>";
+                        $message .= "User ID: $id<br>";
+                        $message .= "Name: $name<br>";
+                        $message .= "Email: $email<br>";
                     }
                     $stmt->close();
                 } else {
-                    $message = 'Database error: ' . $conn->error;
+                    $message = showDbError($conn, "Preparing UPDATE statement");
                 }
             } else {
                 // Check if email already exists
@@ -67,11 +78,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 header('Location: manage_users.php?msg=added');
                                 exit;
                             } else {
-                                $message = 'Insert failed: ' . $conn->error;
+                                $message = showDbError($conn, "User Insert");
+                                $message .= "<strong>Insert Details:</strong><br>";
+                                $message .= "Name: $name<br>";
+                                $message .= "Email: $email<br>";
+                                $message .= "Phone: $phone<br>";
                             }
                             $stmt->close();
                         } else {
-                            $message = 'Database error: ' . $conn->error;
+                            $message = showDbError($conn, "Preparing INSERT statement");
                         }
                     } else {
                         $message = 'Email already exists!';
@@ -102,7 +117,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="card-body">
                 <?php if ($message): ?>
-                    <div class="alert alert-info"><?= $message ?></div>
+                    <div class="alert alert-<?=strpos($message, 'failed') !== false || strpos($message, 'Error') !== false || strpos($message, 'error') !== false ? 'danger' : 'info'?>">
+                        <?php 
+                        // Check if it's already HTML formatted (from showDbError)
+                        if (strpos($message, '<div') !== false || strpos($message, '<strong') !== false) {
+                            echo $message;
+                        } else {
+                            echo htmlspecialchars($message);
+                        }
+                        ?>
+                    </div>
                 <?php endif; ?>
                 <form method="POST">
                     <input type="hidden" name="user_id" value="<?= htmlspecialchars($u['user_id']) ?>" />

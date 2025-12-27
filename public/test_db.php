@@ -64,11 +64,42 @@ if ($conn->connect_error) {
         $row = $result->fetch_assoc();
         echo "<p>Total admins in database: " . $row['count'] . "</p>";
         if ($row['count'] == 0) {
-            echo "<p style='color:orange;'>⚠️ No admin accounts found. You need to create one manually.</p>";
+            echo "<div style='background:#fff3cd;border:1px solid #ffc107;padding:15px;margin:10px 0;border-radius:5px;'>";
+            echo "<h4 style='color:#856404;margin-top:0;'>⚠️ No Admin Accounts Found</h4>";
+            echo "<p style='color:#856404;'>You need to create an admin account to access admin features.</p>";
+            echo "<p><strong>Quick Fix:</strong></p>";
+            echo "<ol style='color:#856404;'>";
+            echo "<li>Click the button below to create an admin account</li>";
+            echo "<li>Or use the default admin (if schema was imported with initial data):</li>";
+            echo "<ul>";
+            echo "<li>Email: <code>admin@smartelectric.com</code></li>";
+            echo "<li>Password: <code>admin123</code></li>";
+            echo "</ul>";
+            echo "</ol>";
+            echo "<a href='create_admin.php' class='btn btn-warning' style='margin-top:10px;'>🔐 Create Admin Account</a>";
+            echo "</div>";
+        } else {
+            echo "<p style='color:green;'>✅ Admin accounts exist. You can login or create more.</p>";
+            echo "<a href='create_admin.php' class='btn btn-info' style='margin-top:10px;'>Create Another Admin</a>";
+        }
+    }
+    
+    // Check Main_Admin
+    echo "<h3>Main Admin Count:</h3>";
+    $result = $conn->query("SELECT COUNT(*) as count FROM Main_Admin");
+    if ($result) {
+        $row = $result->fetch_assoc();
+        echo "<p>Total main admins: " . $row['count'] . "</p>";
+        if ($row['count'] == 0) {
+            echo "<p style='color:orange;'>⚠️ No Main Admin found. This will be created automatically when you create your first admin.</p>";
         }
     }
 }
 
-echo "<br><a href='index.php'>Back to Home</a>";
+echo "<br><div style='margin-top:20px;'>";
+echo "<a href='index.php' class='btn btn-secondary'>Back to Home</a> ";
+echo "<a href='create_admin.php' class='btn btn-primary'>Create Admin Account</a> ";
+echo "<a href='init_database.php' class='btn btn-info'>Database Setup</a>";
+echo "</div>";
 ?>
 

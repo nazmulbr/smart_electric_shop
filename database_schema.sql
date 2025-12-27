@@ -13,7 +13,7 @@ CREATE TABLE Admin (
     email VARCHAR(100) UNIQUE,
     password VARCHAR(255),
     phone_number VARCHAR(20),
-    FOREIGN KEY (main_id) REFERENCES Main_Admin(main_id)
+    FOREIGN KEY (main_id) REFERENCES Main_Admin(main_id) ON DELETE SET NULL
 );
 
 CREATE TABLE Staff (
@@ -161,4 +161,14 @@ CREATE TABLE CanCheckOrder (
     FOREIGN KEY (order_id) REFERENCES `Order`(order_id),
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
+
+-- Insert Initial Data
+-- Create default Main Admin
+INSERT INTO Main_Admin (main_id, name) VALUES (1, 'System Administrator');
+
+-- Create default Admin account
+-- Default password: admin123 (change after first login!)
+-- Password hash for 'admin123'
+INSERT INTO Admin (main_id, name, email, password, phone_number) 
+VALUES (1, 'Administrator', 'admin@smartelectric.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '1234567890');
 

@@ -1,5 +1,15 @@
 <?php
 session_start();
+require_once '../config/db.php';
+require_once '../config/db_check.php';
+
+// Check if database is set up
+if (!checkTableExists('User')) {
+    // Redirect to initialization page if tables don't exist
+    header('Location: init_database.php');
+    exit;
+}
+
 if (isset($_SESSION['user_id'])) {
     if ($_SESSION['role'] === 'admin') {
         header('Location: admin_dashboard.php');
