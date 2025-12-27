@@ -1,0 +1,59 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: login.php');
+    exit;
+}
+require_once '../config/db.php';
+
+// Handle deletion
+if (isset($_GET['delete'])) {
+    $uid = intval($_GET['delete']);
+    $stmt = $conn->prepare('DELETE FROM User WHERE user_id=?');
+    $stmt->bind_param('i', $uid);
+    $stmt->execute();
+    header('Location: manage_users.php');
+    exit;
+}
+
+// Get users
+$result = $conn->query('SELECT * FROM User');
+$users = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Users - Smart Electric Shop</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <h4>User Management</h4>
+        <div class="mb-2">
+            <a href="admin_dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+        <table class="table table-bordered bg-white">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($users as $u): ?>
+                <tr>
+                    <td><?=htmlspecialchars($u['user_id'])?></td>
+                    <td><?=htmlspecialchars($u['name'])?></td>
+                    <td><?=htmlspecialchars($u['email'])?></td>
+                    <td><?=htmlspecialchars($u['phone_number'])?></td>
+                    <td>
+                        <a href="user_form.php?edit=<?=$u['user_id']?>" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="manage_users.php?delete=<?=$u['user_id']?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this user?')">Delete</a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+
