@@ -1,7 +1,8 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
-    header('Location: login.php'); exit;
+    header('Location: login.php');
+    exit;
 }
 require_once '../config/db.php';
 
@@ -62,53 +63,66 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Shopping Cart - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container mt-4">
         <h4>Shopping Cart</h4>
-        <?php if ($message): ?><div class="alert alert-info"><?=$message?></div><?php endif; ?>
+        <?php if ($message): ?><div class="alert alert-info"><?= $message ?></div><?php endif; ?>
         <?php if (empty($cart_items)): ?>
             <div class="alert alert-warning">Your cart is empty. <a href="view_products.php">Browse Products</a></div>
         <?php else: ?>
             <table class="table table-bordered bg-white">
                 <thead class="thead-dark">
-                    <tr><th>Product</th><th>Unit Price</th><th>Discount</th><th>Quantity</th><th>Total</th><th>Actions</th></tr>
+                    <tr>
+                        <th>Product</th>
+                        <th>Unit Price</th>
+                        <th>Discount</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($cart_items as $item): ?>
-                    <tr>
-                        <td><?=htmlspecialchars($item['name'])?></td>
-                        <td><?=number_format($item['price'], 2)?></td>
-                        <td><?=$item['discount'] > 0 ? $item['discount'].'%' : 'None'?></td>
-                        <td>
-                            <form method="POST" class="form-inline">
-                                <input type="hidden" name="prod_id" value="<?=$item['product_id']?>" />
-                                <input type="number" name="qty" value="<?=$item['quantity']?>" class="form-control" min="1" style="width:70px;" />
-                                <input type="submit" name="update" value="Update" class="btn btn-sm btn-primary ml-1" />
-                            </form>
-                        </td>
-                        <td><?=number_format($item['item_total'], 2)?></td>
-                        <td>
-                            <form method="POST">
-                                <input type="hidden" name="prod_id" value="<?=$item['product_id']?>" />
-                                <input type="submit" name="remove" value="Remove" class="btn btn-sm btn-danger" onclick="return confirm('Remove this item?')" />
-                            </form>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td><?= htmlspecialchars($item['name']) ?></td>
+                            <td><?= number_format($item['price'], 2) ?></td>
+                            <td><?= $item['discount'] > 0 ? $item['discount'] . '%' : 'None' ?></td>
+                            <td>
+                                <form method="POST" class="form-inline">
+                                    <input type="hidden" name="prod_id" value="<?= $item['product_id'] ?>" />
+                                    <input type="number" name="qty" value="<?= $item['quantity'] ?>" class="form-control" min="1" style="width:70px;" />
+                                    <input type="submit" name="update" value="Update" class="btn btn-sm btn-primary ml-1" />
+                                </form>
+                            </td>
+                            <td><?= number_format($item['item_total'], 2) ?></td>
+                            <td>
+                                <form method="POST">
+                                    <input type="hidden" name="prod_id" value="<?= $item['product_id'] ?>" />
+                                    <input type="submit" name="remove" value="Remove" class="btn btn-sm btn-danger" onclick="return confirm('Remove this item?')" />
+                                </form>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                 </tbody>
                 <tfoot>
-                    <tr class="table-info"><th colspan="4">Grand Total</th><th><?=number_format($total, 2)?></th><th></th></tr>
+                    <tr class="table-info">
+                        <th colspan="4">Grand Total</th>
+                        <th><?= number_format($total, 2) ?></th>
+                        <th></th>
+                    </tr>
                 </tfoot>
             </table>
             <a href="checkout.php" class="btn btn-success btn-lg">Proceed to Checkout</a>
         <?php endif; ?>
         <a href="view_products.php" class="btn btn-secondary mt-2">Continue Shopping</a>
-        <a href="user_dashboard.php" class="btn btn-secondary mt-2">Back to Dashboard</a>
+        <a href="index.php" class="btn btn-secondary mt-2">Back to Home</a>
     </div>
 </body>
-</html>
 
+</html>

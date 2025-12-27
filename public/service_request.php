@@ -1,7 +1,8 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
-    header('Location: login.php'); exit;
+    header('Location: login.php');
+    exit;
 }
 require_once '../config/db.php';
 
@@ -33,21 +34,23 @@ $warranty_options = $warrs ? $warrs->fetch_all(MYSQLI_ASSOC) : [];
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Service Requests - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container mt-4">
         <h4>Submit Service Request</h4>
-        <?php if ($message): ?><div class="alert alert-info"><?=$message?></div><?php endif; ?>
+        <?php if ($message): ?><div class="alert alert-info"><?= $message ?></div><?php endif; ?>
         <form method="POST" class="mb-3">
             <div class="form-group">
                 <label>Warranty</label>
                 <select name="warranty_id" class="form-control">
                     <option value="0">(optional)</option>
-                    <?php foreach($warranty_options as $w): ?>
-                    <option value="<?=$w['warranty_id']?>">Purchased: <?=$w['purchase_date']?></option>
+                    <?php foreach ($warranty_options as $w): ?>
+                        <option value="<?= $w['warranty_id'] ?>">Purchased: <?= $w['purchase_date'] ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -59,19 +62,27 @@ $warranty_options = $warrs ? $warrs->fetch_all(MYSQLI_ASSOC) : [];
         </form>
         <h4>My Service Requests</h4>
         <table class="table table-bordered bg-white col-md-10">
-            <thead class="thead-dark"><tr><th>ID</th><th>Warranty</th><th>Issue</th><th>Status</th></tr></thead>
-            <tbody>
-                <?php foreach($requests as $r): ?>
+            <thead class="thead-dark">
                 <tr>
-                    <td><?=$r['request_id']?></td>
-                    <td><?=$r['purchase_date']?></td>
-                    <td><?=htmlspecialchars($r['issue'])?></td>
-                    <td><?=htmlspecialchars($r['status'])?></td>
+                    <th>ID</th>
+                    <th>Warranty</th>
+                    <th>Issue</th>
+                    <th>Status</th>
                 </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($requests as $r): ?>
+                    <tr>
+                        <td><?= $r['request_id'] ?></td>
+                        <td><?= $r['purchase_date'] ?></td>
+                        <td><?= htmlspecialchars($r['issue']) ?></td>
+                        <td><?= htmlspecialchars($r['status']) ?></td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
-        <a href="user_dashboard.php" class="btn btn-secondary mt-2">Back to Dashboard</a>
+        <a href="index.php" class="btn btn-secondary mt-2">Back to Home</a>
     </div>
 </body>
+
 </html>

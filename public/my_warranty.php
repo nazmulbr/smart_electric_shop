@@ -54,7 +54,7 @@ if ($warranty) {
         <?php else: ?>
             <div class="alert alert-info">No warranty associated with your account.</div>
         <?php endif; ?>
-        <a href="user_dashboard.php" class="btn btn-secondary mt-2">Back to Dashboard</a>
+        <a href="index.php" class="btn btn-secondary mt-2">Back to Home</a>
     </div>
 </body>
 

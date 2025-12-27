@@ -50,31 +50,118 @@ if (checkTableExists('Product')) {
         }
 
         .my-account-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            position: static;
+            width: auto;
+            height: auto;
+            border-radius: 20px;
             background-color: var(--primary-color);
             color: white;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            display: flex;
+            box-shadow: none;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 14px;
             z-index: 999;
             transition: all 0.3s ease;
             text-decoration: none;
+            padding: 8px 20px;
+            margin-left: auto;
+            gap: 8px;
         }
 
         .my-account-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            transform: none;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
             color: white;
             text-decoration: none;
+        }
+
+        .my-account-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .my-account-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 250px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            z-index: 1000;
+            margin-top: 10px;
+            overflow: hidden;
+            animation: slideDown 0.3s ease;
+        }
+
+        .my-account-dropdown:hover .my-account-menu {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .my-account-menu-header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .my-account-menu-header p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .my-account-menu-header .user-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .my-account-menu-header .user-email {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .my-account-menu-item {
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .my-account-menu-item:hover {
+            background-color: #f8f9fa;
+            padding-left: 25px;
+            color: var(--primary-color);
+        }
+
+        .my-account-menu-item i {
+            margin-right: 8px;
+            width: 18px;
+        }
+
+        .my-account-menu-item.logout {
+            color: var(--danger-color);
+            border-bottom: none;
+        }
+
+        .my-account-menu-item.logout:hover {
+            background-color: #ffe6e6;
         }
 
         .my-account-btn.hidden {
@@ -262,6 +349,97 @@ if (checkTableExists('Product')) {
             font-size: 1.2rem;
         }
 
+        .feature-menu-section {
+            margin-bottom: 50px;
+        }
+
+        .feature-menu-section h2 {
+            color: white;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-menu-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .feature-menu-link:hover {
+            text-decoration: none;
+        }
+
+        .feature-menu-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-menu-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-menu-card.locked-card {
+            opacity: 0.85;
+            position: relative;
+        }
+
+        .feature-menu-card.locked-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+        }
+
+        .feature-menu-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .feature-menu-card.locked-card .feature-menu-icon {
+            color: #ccc;
+        }
+
+        .feature-menu-title {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .feature-menu-text {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .lock-badge {
+            display: block;
+            background: #ffc107;
+            color: #333;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
         .success-popup {
             position: fixed;
             top: 20px;
@@ -326,11 +504,8 @@ if (checkTableExists('Product')) {
 
         @media (max-width: 768px) {
             .my-account-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-                bottom: 20px;
-                right: 20px;
+                padding: 6px 15px;
+                font-size: 12px;
             }
 
             .product-section h2 {
@@ -340,6 +515,109 @@ if (checkTableExists('Product')) {
             .jumbotron {
                 padding: 40px 20px;
             }
+        }
+
+        /* User Dashboard Section Styles */
+        .user-dashboard-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            padding: 40px 0;
+            margin-bottom: 50px;
+        }
+
+        .user-dashboard-section h2 {
+            color: white;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .user-dashboard-section h3 {
+            color: white;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .user-info-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .user-info-card h5 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+        }
+
+        .user-info-item {
+            margin-bottom: 20px;
+        }
+
+        .user-info-item label {
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .user-info-item p {
+            color: #333;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .dashboard-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .dashboard-card-link:hover {
+            text-decoration: none;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+        }
+
+        .dashboard-card h6 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .dashboard-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -352,9 +630,39 @@ if (checkTableExists('Product')) {
                 <i class="fas fa-bolt"></i> Smart Electric Shop
             </a>
             <div class="navbar-right">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <span class="navbar-text mr-3">Welcome, <?= htmlspecialchars($_SESSION['name'] ?? '') ?></span>
-                    <a href="logout.php" class="logout-btn">Logout</a>
+                <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'user'): ?>
+                    <!-- My Account Dropdown for Users -->
+                    <div class="my-account-dropdown">
+                        <button class="my-account-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <span><?= htmlspecialchars($_SESSION['name'] ?? 'Account') ?></span>
+                            <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                        </button>
+                        <div class="my-account-menu">
+                            <div class="my-account-menu-header">
+                                <p class="user-name"><i class="fas fa-user"></i> <?= htmlspecialchars($_SESSION['name'] ?? '') ?></p>
+                                <p class="user-email"><i class="fas fa-envelope"></i> <?= htmlspecialchars($_SESSION['email'] ?? '') ?></p>
+                            </div>
+                            <a href="#user-info-section" class="my-account-menu-item" onclick="scrollToUserInfo()">
+                                <i class="fas fa-id-card"></i> My Information
+                            </a>
+                            <a href="cart.php" class="my-account-menu-item">
+                                <i class="fas fa-shopping-cart"></i> Shopping Cart
+                            </a>
+                            <a href="my_orders.php" class="my-account-menu-item">
+                                <i class="fas fa-receipt"></i> My Orders
+                            </a>
+                            <a href="my_warranty.php" class="my-account-menu-item">
+                                <i class="fas fa-shield-alt"></i> Warranty Status
+                            </a>
+                            <a href="reward_points.php" class="my-account-menu-item">
+                                <i class="fas fa-gift"></i> Reward Points
+                            </a>
+                            <a href="logout.php" class="my-account-menu-item logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
                 <?php else: ?>
                     <a href="login.php" class="btn btn-outline-primary btn-sm">Login</a>
                     <a href="register.php" class="btn btn-primary btn-sm">Register</a>
@@ -369,12 +677,6 @@ if (checkTableExists('Product')) {
             <p class="lead">Your one-stop shop for all electrical products and services</p>
             <hr class="my-4">
             <p>Browse our premium collection of electrical products with warranty and energy usage information.</p>
-            <?php if (!isset($_SESSION['user_id'])): ?>
-                <a class="btn btn-primary btn-auth btn-lg" href="login.php" role="button">Login</a>
-                <a class="btn btn-success btn-auth btn-lg" href="register.php" role="button">Register</a>
-            <?php else: ?>
-                <p class="text-success"><i class="fas fa-check-circle"></i> You're logged in. Browse and shop!</p>
-            <?php endif; ?>
         </div>
 
         <!-- Feature Cards -->
@@ -444,6 +746,233 @@ if (checkTableExists('Product')) {
                     </a>
                 <?php endif; ?>
             </div>
+
+            <!-- Feature Menu Section -->
+            <div class="feature-menu-section mt-5">
+                <h2 class="text-center mb-5"><i class="fas fa-th-large"></i> Shop Features</h2>
+                <div class="row">
+                    <!-- Browse Products -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <a href="view_products.php" class="feature-menu-link">
+                            <div class="feature-menu-card">
+                                <div class="feature-menu-icon">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                                <h6 class="feature-menu-title">Browse Products</h6>
+                                <p class="feature-menu-text">Explore our wide range of electrical products</p>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Shopping Cart -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <a href="cart.php" class="feature-menu-link">
+                            <?php else: ?>
+                                <a href="login.php" class="feature-menu-link">
+                                <?php endif; ?>
+                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
+                                    <div class="feature-menu-icon">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <h6 class="feature-menu-title">Shopping Cart</h6>
+                                    <p class="feature-menu-text">View and manage your shopping cart <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
+                                </div>
+                                </a>
+                    </div>
+
+                    <!-- My Orders -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <a href="my_orders.php" class="feature-menu-link">
+                            <?php else: ?>
+                                <a href="login.php" class="feature-menu-link">
+                                <?php endif; ?>
+                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
+                                    <div class="feature-menu-icon">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <h6 class="feature-menu-title">My Orders</h6>
+                                    <p class="feature-menu-text">Track and manage your orders <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
+                                </div>
+                                </a>
+                    </div>
+
+                    <!-- Warranty Status -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <a href="my_warranty.php" class="feature-menu-link">
+                            <?php else: ?>
+                                <a href="login.php" class="feature-menu-link">
+                                <?php endif; ?>
+                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
+                                    <div class="feature-menu-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <h6 class="feature-menu-title">Warranty Status</h6>
+                                    <p class="feature-menu-text">Check your product warranties <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
+                                </div>
+                                </a>
+                    </div>
+
+                    <!-- Reward Points -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <a href="reward_points.php" class="feature-menu-link">
+                            <?php else: ?>
+                                <a href="login.php" class="feature-menu-link">
+                                <?php endif; ?>
+                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
+                                    <div class="feature-menu-icon">
+                                        <i class="fas fa-gift"></i>
+                                    </div>
+                                    <h6 class="feature-menu-title">Reward Points</h6>
+                                    <p class="feature-menu-text">Earn and redeem rewards <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
+                                </div>
+                                </a>
+                    </div>
+
+                    <!-- Service Requests -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <a href="service_request.php" class="feature-menu-link">
+                            <?php else: ?>
+                                <a href="login.php" class="feature-menu-link">
+                                <?php endif; ?>
+                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
+                                    <div class="feature-menu-icon">
+                                        <i class="fas fa-tools"></i>
+                                    </div>
+                                    <h6 class="feature-menu-title">Service Requests</h6>
+                                    <p class="feature-menu-text">Submit maintenance requests <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
+                                </div>
+                                </a>
+                    </div>
+
+                    <!-- Energy Calculator -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <a href="energy_usage.php" class="feature-menu-link">
+                            <div class="feature-menu-card">
+                                <div class="feature-menu-icon">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <h6 class="feature-menu-title">Energy Calculator</h6>
+                                <p class="feature-menu-text">Calculate energy usage and costs</p>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Contact Support -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <a href="contact.php" class="feature-menu-link">
+                            <div class="feature-menu-card">
+                                <div class="feature-menu-icon">
+                                    <i class="fas fa-headset"></i>
+                                </div>
+                                <h6 class="feature-menu-title">Contact Support</h6>
+                                <p class="feature-menu-text">Get help from our support team</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Dashboard Section (Only for logged in users) -->
+            <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'user'): ?>
+                <div id="user-info-section" class="user-dashboard-section mt-5">
+                    <h2 class="text-center mb-4"><i class="fas fa-user-circle"></i> My Account</h2>
+
+                    <!-- User Information Card -->
+                    <div class="row mb-5">
+                        <div class="col-md-6 offset-md-3">
+                            <div class="user-info-card">
+                                <h5><i class="fas fa-user"></i> Account Information</h5>
+                                <div class="user-info-item">
+                                    <label>Name:</label>
+                                    <p><?= htmlspecialchars($_SESSION['name'] ?? '') ?></p>
+                                </div>
+                                <div class="user-info-item">
+                                    <label>Email:</label>
+                                    <p><?= htmlspecialchars($_SESSION['email'] ?? '') ?></p>
+                                </div>
+                                <hr>
+                                <a href="user_form.php" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit"></i> Edit Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Dashboard Features -->
+                    <h3 class="text-center mb-4">Quick Actions</h3>
+                    <div class="row">
+                        <!-- Shopping Cart -->
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            <a href="cart.php" class="dashboard-card-link">
+                                <div class="dashboard-card">
+                                    <div class="dashboard-icon">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <h6>Shopping Cart</h6>
+                                    <p>View and manage your shopping cart</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- My Orders -->
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            <a href="my_orders.php" class="dashboard-card-link">
+                                <div class="dashboard-card">
+                                    <div class="dashboard-icon">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <h6>My Orders</h6>
+                                    <p>Track and manage your orders</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Warranty Status -->
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            <a href="my_warranty.php" class="dashboard-card-link">
+                                <div class="dashboard-card">
+                                    <div class="dashboard-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <h6>Warranty Status</h6>
+                                    <p>Check your product warranties</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Reward Points -->
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            <a href="reward_points.php" class="dashboard-card-link">
+                                <div class="dashboard-card">
+                                    <div class="dashboard-icon">
+                                        <i class="fas fa-gift"></i>
+                                    </div>
+                                    <h6>Reward Points</h6>
+                                    <p>Earn and redeem rewards</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Service Requests -->
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            <a href="service_request.php" class="dashboard-card-link">
+                                <div class="dashboard-card">
+                                    <div class="dashboard-icon">
+                                        <i class="fas fa-tools"></i>
+                                    </div>
+                                    <h6>Service Requests</h6>
+                                    <p>Submit maintenance requests</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <!-- Products Section -->
             <?php if (!empty($products)): ?>
@@ -527,6 +1056,32 @@ if (checkTableExists('Product')) {
 
                 // Clean up the URL parameter
                 window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // Check for login success message from URL parameter
+            if (urlParams.has('login_success')) {
+                const popup = document.createElement('div');
+                popup.className = 'success-popup';
+                popup.innerHTML = '<i class="fas fa-check-circle"></i> Successfully logged in!';
+                document.body.appendChild(popup);
+
+                // Remove the popup after 2 seconds with animation
+                setTimeout(() => {
+                    popup.remove();
+                }, 2000);
+
+                // Clean up the URL parameter
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // Function to scroll to user info section
+            function scrollToUserInfo() {
+                const element = document.getElementById('user-info-section');
+                if (element) {
+                    element.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
             }
         </script>
 </body>

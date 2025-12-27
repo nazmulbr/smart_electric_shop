@@ -124,7 +124,8 @@ if ($conn->connect_error) {
                 } elseif ($user_data['role'] === 'staff') {
                     header('Location: staff_dashboard.php');
                 } else {
-                    header('Location: user_dashboard.php');
+                    // Regular users go to homepage instead of dashboard
+                    header('Location: index.php?login_success=1');
                 }
                 exit;
             }
@@ -358,6 +359,10 @@ if ($conn->connect_error) {
                             <i class="fas fa-sign-in-alt"></i> Login
                         </button>
                     </form>
+                    <hr>
+                    <div class="text-center-custom">
+                        <small>Are you an admin and can't login? <a href="admin_login_fix.php"><strong>Click here for help</strong></a></small>
+                    </div>
                     <div class="text-center-custom">
                         Don't have an account? <a href="register.php">Register here</a>
                     </div>

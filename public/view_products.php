@@ -1,7 +1,8 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
-    header('Location: login.php'); exit;
+    header('Location: login.php');
+    exit;
 }
 require_once '../config/db.php';
 $result = $conn->query('SELECT * FROM Product');
@@ -20,38 +21,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Products - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container mt-4">
         <h4>All Products</h4>
-        <?php if($added): ?><div class="alert alert-success"><?= $added ?></div><?php endif; ?>
+        <?php if ($added): ?><div class="alert alert-success"><?= $added ?></div><?php endif; ?>
         <a href="cart.php" class="btn btn-info float-right mb-2">Go to Cart</a>
         <table class="table table-bordered bg-white">
-            <thead class="thead-dark"><tr><th>Name</th><th>Description</th><th>Price</th><th>Warranty</th><th>Available</th><th>Add</th></tr></thead>
-            <tbody>
-            <?php foreach($products as $p): ?>
+            <thead class="thead-dark">
                 <tr>
-                    <td><?=htmlspecialchars($p['name'])?></td>
-                    <td><?=htmlspecialchars($p['description'])?></td>
-                    <td><?=htmlspecialchars($p['price'])?></td>
-                    <td><?=htmlspecialchars($p['warranty_duration'])?> months</td>
-                    <td><?=htmlspecialchars($p['available_quantity'])?></td>
-                    <td>
-                        <form method="POST" class="form-inline">
-                            <input type="hidden" name="prod_id" value="<?=$p['product_id']?>" />
-                            <input type="number" name="qty" value="1" class="form-control mr-2" min="1" max="<?=$p['available_quantity']?>" style="width:70px;" />
-                            <button class="btn btn-success btn-sm">Add</button>
-                        </form>
-                    </td>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Warranty</th>
+                    <th>Available</th>
+                    <th>Add</th>
                 </tr>
-            <?php endforeach; ?>
+            </thead>
+            <tbody>
+                <?php foreach ($products as $p): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($p['name']) ?></td>
+                        <td><?= htmlspecialchars($p['description']) ?></td>
+                        <td><?= htmlspecialchars($p['price']) ?></td>
+                        <td><?= htmlspecialchars($p['warranty_duration']) ?> months</td>
+                        <td><?= htmlspecialchars($p['available_quantity']) ?></td>
+                        <td>
+                            <form method="POST" class="form-inline">
+                                <input type="hidden" name="prod_id" value="<?= $p['product_id'] ?>" />
+                                <input type="number" name="qty" value="1" class="form-control mr-2" min="1" max="<?= $p['available_quantity'] ?>" style="width:70px;" />
+                                <button class="btn btn-success btn-sm">Add</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
-        <a href="user_dashboard.php" class="btn btn-secondary mt-2">Back to Dashboard</a>
+        <a href="index.php" class="btn btn-secondary mt-2">Back to Home</a>
     </div>
 </body>
-</html>
 
+</html>

@@ -1,7 +1,8 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
-    header('Location: login.php'); exit;
+    header('Location: login.php');
+    exit;
 }
 require_once '../config/db.php';
 
@@ -29,18 +30,22 @@ $user = $_SESSION;
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Contact Support - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container mt-4">
         <h4>Contact Support</h4>
-        <?php if ($message): ?><div class="alert alert-info"><?=$message?></div><?php endif; ?>
+        <?php if ($message): ?><div class="alert alert-info"><?= $message ?></div><?php endif; ?>
         <div class="row">
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header"><h5>Shop Contact Details</h5></div>
+                    <div class="card-header">
+                        <h5>Shop Contact Details</h5>
+                    </div>
                     <div class="card-body">
                         <p><strong>Email:</strong> support@smartelectric.com</p>
                         <p><strong>Phone:</strong> +880-1234-567890</p>
@@ -51,16 +56,18 @@ $user = $_SESSION;
             </div>
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header"><h5>Send Message</h5></div>
+                    <div class="card-header">
+                        <h5>Send Message</h5>
+                    </div>
                     <div class="card-body">
                         <form method="POST">
                             <div class="form-group">
                                 <label>Name</label>
-                                <input type="text" name="name" value="<?=htmlspecialchars($user['name'])?>" class="form-control" required />
+                                <input type="text" name="name" value="<?= htmlspecialchars($user['name']) ?>" class="form-control" required />
                             </div>
                             <div class="form-group">
                                 <label>Email</label>
-                                <input type="email" name="email" value="<?=htmlspecialchars($user['email'])?>" class="form-control" required />
+                                <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" class="form-control" required />
                             </div>
                             <div class="form-group">
                                 <label>Subject</label>
@@ -76,8 +83,8 @@ $user = $_SESSION;
                 </div>
             </div>
         </div>
-        <a href="user_dashboard.php" class="btn btn-secondary mt-2">Back to Dashboard</a>
+        <a href="index.php" class="btn btn-secondary mt-2">Back to Home</a>
     </div>
 </body>
-</html>
 
+</html>

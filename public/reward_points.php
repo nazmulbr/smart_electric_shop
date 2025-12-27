@@ -32,7 +32,7 @@ if (!isset($points)) $points = 0;
             </tr>
         </table>
         <div class="alert alert-info">You earn points from purchases. Points may be redeemed for discounts at checkout (if enabled).</div>
-        <a href="user_dashboard.php" class="btn btn-secondary mt-2">Back to Dashboard</a>
+        <a href="index.php" class="btn btn-secondary mt-2">Back to Home</a>
     </div>
 </body>
 
