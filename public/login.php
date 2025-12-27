@@ -5,42 +5,112 @@ require_once '../config/db.php';
 
 $login_err = '';
 
-if ($_SERVER["REQUEST_METHOD"] === 'POST') {
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-    
-    if ($email && $password) {
-        // Try Admin login
-        $sql = "SELECT 'admin' AS role, admin_id AS id, email, password, name FROM Admin WHERE email = ? UNION ALL
-                SELECT 'staff', staff_id, email, password, name FROM Staff WHERE email = ? UNION ALL
-                SELECT 'user', user_id, email, password, name FROM User WHERE email = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('sss', $email, $email, $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result && $row = $result->fetch_assoc()) {
-            if (password_verify($password, $row['password'])) {
-                $_SESSION['user_id'] = $row['id'];
-                $_SESSION['role'] = $row['role'];
-                $_SESSION['email'] = $row['email'];
-                $_SESSION['name'] = $row['name'];
+// Check database connection
+if ($conn->connect_error) {
+    $login_err = 'Database connection failed. Please check your configuration.';
+} else {
+    if ($_SERVER["REQUEST_METHOD"] === 'POST') {
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        
+        if ($email && $password) {
+            $user_found = false;
+            $user_data = null;
+            
+            // Try Admin login first
+            $stmt = $conn->prepare("SELECT admin_id AS id, email, password, name FROM Admin WHERE email = ?");
+            if ($stmt) {
+                $stmt->bind_param('s', $email);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result && $row = $result->fetch_assoc()) {
+                    if (password_verify($password, $row['password'])) {
+                        $user_data = [
+                            'id' => $row['id'],
+                            'role' => 'admin',
+                            'email' => $row['email'],
+                            'name' => $row['name']
+                        ];
+                        $user_found = true;
+                    } else {
+                        $login_err = 'Invalid password.';
+                    }
+                }
+                $stmt->close();
+            }
+            
+            // Try Staff login if admin not found
+            if (!$user_found) {
+                $stmt = $conn->prepare("SELECT staff_id AS id, email, password, name FROM Staff WHERE email = ?");
+                if ($stmt) {
+                    $stmt->bind_param('s', $email);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    if ($result && $row = $result->fetch_assoc()) {
+                        if (password_verify($password, $row['password'])) {
+                            $user_data = [
+                                'id' => $row['id'],
+                                'role' => 'staff',
+                                'email' => $row['email'],
+                                'name' => $row['name']
+                            ];
+                            $user_found = true;
+                        } else {
+                            $login_err = 'Invalid password.';
+                        }
+                    }
+                    $stmt->close();
+                }
+            }
+            
+            // Try User login if staff not found
+            if (!$user_found) {
+                $stmt = $conn->prepare("SELECT user_id AS id, email, password, name FROM User WHERE email = ?");
+                if ($stmt) {
+                    $stmt->bind_param('s', $email);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    if ($result && $row = $result->fetch_assoc()) {
+                        if (password_verify($password, $row['password'])) {
+                            $user_data = [
+                                'id' => $row['id'],
+                                'role' => 'user',
+                                'email' => $row['email'],
+                                'name' => $row['name']
+                            ];
+                            $user_found = true;
+                        } else {
+                            $login_err = 'Invalid password.';
+                        }
+                    } else {
+                        if (empty($login_err)) {
+                            $login_err = 'No account found for this email.';
+                        }
+                    }
+                    $stmt->close();
+                }
+            }
+            
+            // If user found and authenticated, set session and redirect
+            if ($user_found && $user_data) {
+                $_SESSION['user_id'] = $user_data['id'];
+                $_SESSION['role'] = $user_data['role'];
+                $_SESSION['email'] = $user_data['email'];
+                $_SESSION['name'] = $user_data['name'];
+                
                 // Redirect based on role
-                if ($row['role'] === 'admin') {
+                if ($user_data['role'] === 'admin') {
                     header('Location: admin_dashboard.php');
-                } elseif ($row['role'] === 'staff') {
+                } elseif ($user_data['role'] === 'staff') {
                     header('Location: staff_dashboard.php');
                 } else {
                     header('Location: user_dashboard.php');
                 }
                 exit;
-            } else {
-                $login_err = 'Invalid password.';
             }
         } else {
-            $login_err = 'No account found for this email.';
+            $login_err = 'Please enter both email and password.';
         }
-    } else {
-        $login_err = 'Please enter both email and password.';
     }
 }
 ?>

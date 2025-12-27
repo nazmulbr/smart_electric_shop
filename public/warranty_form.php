@@ -22,21 +22,41 @@ if($isEdit) {
 // POST (add/update)
 if($_SERVER['REQUEST_METHOD']==='POST') {
     $id=intval($_POST['warranty_id']??0);
-    $duration=$_POST['warranty_duration']??'';
-    $date=$_POST['purchase_date']??'';
-    if ($duration && $date) {
+    $duration=intval($_POST['warranty_duration']??0);
+    $date=trim($_POST['purchase_date']??'');
+    
+    if ($duration > 0 && $date) {
         if ($id) {
             $stmt = $conn->prepare('UPDATE Warranty SET warranty_duration=?, purchase_date=? WHERE warranty_id=?');
-            $stmt->bind_param('isi',$duration,$date,$id);
-            if($stmt->execute()) $message='Warranty updated!';
+            if ($stmt) {
+                $stmt->bind_param('isi',$duration,$date,$id);
+                if($stmt->execute()) {
+                    header('Location: manage_warranty.php?msg=updated');
+                    exit;
+                } else {
+                    $message='Update failed: ' . $conn->error;
+                }
+                $stmt->close();
+            } else {
+                $message='Database error: ' . $conn->error;
+            }
         } else {
             $stmt = $conn->prepare('INSERT INTO Warranty (warranty_duration, purchase_date) VALUES (?,?)');
-            $stmt->bind_param('is',$duration,$date);
-            if($stmt->execute()) $message='Warranty added!';
+            if ($stmt) {
+                $stmt->bind_param('is',$duration,$date);
+                if($stmt->execute()) {
+                    header('Location: manage_warranty.php?msg=added');
+                    exit;
+                } else {
+                    $message='Insert failed: ' . $conn->error;
+                }
+                $stmt->close();
+            } else {
+                $message='Database error: ' . $conn->error;
+            }
         }
-        header('Location: manage_warranty.php'); exit;
     } else {
-        $message = 'Fill all fields!';
+        $message = 'Please fill all fields correctly! (Duration > 0 and valid date)';
     }
 }
 ?>

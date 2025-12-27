@@ -1,35 +1,68 @@
 <?php
 // User Registration Page
+session_start();
 require_once '../config/db.php';
 
 $register_err = '';
 $register_msg = '';
+$name = '';
+$email = '';
+$phone_number = '';
 
-if ($_SERVER["REQUEST_METHOD"] === 'POST') {
-    $name = $_POST['name'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $phone_number = $_POST['phone_number'] ?? '';
-    if ($name && $email && $password) {
-        // Check if user exists
-        $stmt = $conn->prepare("SELECT user_id FROM User WHERE email = ?");
-        $stmt->bind_param('s', $email);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows == 0) {
-            $hashed = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param('ssss', $name, $email, $hashed, $phone_number);
-            if ($stmt->execute()) {
-                $register_msg = 'Registration successful. <a href=\'login.php\'>Login Now</a>';
+// Check database connection
+if ($conn->connect_error) {
+    $register_err = 'Database connection failed. Please check your configuration.';
+} else {
+    if ($_SERVER["REQUEST_METHOD"] === 'POST') {
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $phone_number = trim($_POST['phone_number'] ?? '');
+        
+        if ($name && $email && $password) {
+            // Validate email format
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $register_err = 'Invalid email format.';
             } else {
-                $register_err = 'Registration failed.';
+                // Check if user exists
+                $check_stmt = $conn->prepare("SELECT user_id FROM User WHERE email = ?");
+                if ($check_stmt) {
+                    $check_stmt->bind_param('s', $email);
+                    $check_stmt->execute();
+                    $check_stmt->store_result();
+                    
+                    if ($check_stmt->num_rows == 0) {
+                        $check_stmt->close();
+                        
+                        // Hash password
+                        $hashed = password_hash($password, PASSWORD_DEFAULT);
+                        
+                        // Insert new user
+                        $insert_stmt = $conn->prepare("INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?)");
+                        if ($insert_stmt) {
+                            $insert_stmt->bind_param('ssss', $name, $email, $hashed, $phone_number);
+                            if ($insert_stmt->execute()) {
+                                $register_msg = 'Registration successful! <a href="login.php">Login Now</a>';
+                                // Clear form data
+                                $name = $email = $phone_number = '';
+                            } else {
+                                $register_err = 'Registration failed: ' . $conn->error;
+                            }
+                            $insert_stmt->close();
+                        } else {
+                            $register_err = 'Database error: ' . $conn->error;
+                        }
+                    } else {
+                        $register_err = 'Email already registered. Please use a different email.';
+                        $check_stmt->close();
+                    }
+                } else {
+                    $register_err = 'Database error: ' . $conn->error;
+                }
             }
         } else {
-            $register_err = 'Email already registered.';
+            $register_err = 'Please fill all required fields (Name, Email, Password)!';
         }
-    } else {
-        $register_err = 'Fill all required fields!';
     }
 }
 ?>
@@ -52,11 +85,11 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
                 <form method="POST">
                     <div class="form-group">
                         <label>Name</label>
-                        <input type="text" name="name" class="form-control" required />
+                        <input type="text" name="name" class="form-control" value="<?=htmlspecialchars($name ?? '')?>" required />
                     </div>
                     <div class="form-group">
                         <label>Email</label>
-                        <input type="email" name="email" class="form-control" required />
+                        <input type="email" name="email" class="form-control" value="<?=htmlspecialchars($email ?? '')?>" required />
                     </div>
                     <div class="form-group">
                         <label>Password</label>
@@ -64,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
                     </div>
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="text" name="phone_number" class="form-control" />
+                        <input type="text" name="phone_number" class="form-control" value="<?=htmlspecialchars($phone_number ?? '')?>" />
                     </div>
                     <button type="submit" class="btn btn-success btn-block">Register</button>
                 </form>

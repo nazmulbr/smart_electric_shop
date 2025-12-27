@@ -24,26 +24,49 @@ if ($isEdit) {
 // Handle POST (add or update)
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     $id = intval($_POST['product_id'] ?? 0);
-    $name = $_POST['name'] ?? '';
-    $desc = $_POST['description'] ?? '';
-    $price = $_POST['price'] ?? '';
-    $warranty = $_POST['warranty_duration'] ?? '';
-    $qty = $_POST['available_quantity'] ?? '';
+    $name = trim($_POST['name'] ?? '');
+    $desc = trim($_POST['description'] ?? '');
+    $price = floatval($_POST['price'] ?? 0);
+    $warranty = intval($_POST['warranty_duration'] ?? 0);
+    $qty = intval($_POST['available_quantity'] ?? 0);
     $admin_id = $_SESSION['user_id'];
-    if ($name && $price && $qty) {
+    
+    if ($name && $price > 0 && $qty >= 0) {
         if ($id) {
+            // Update existing product
             $stmt = $conn->prepare('UPDATE Product SET name=?, description=?, price=?, warranty_duration=?, available_quantity=? WHERE product_id=?');
-            $stmt->bind_param('ssddii', $name, $desc, $price, $warranty, $qty, $id);
-            if($stmt->execute()) $message = 'Product updated!';
+            if ($stmt) {
+                $stmt->bind_param('ssdiii', $name, $desc, $price, $warranty, $qty, $id);
+                if($stmt->execute()) {
+                    $message = 'Product updated successfully!';
+                    header('Location: manage_products.php?msg=updated');
+                    exit;
+                } else {
+                    $message = 'Update failed: ' . $conn->error;
+                }
+                $stmt->close();
+            } else {
+                $message = 'Database error: ' . $conn->error;
+            }
         } else {
+            // Insert new product
             $stmt = $conn->prepare('INSERT INTO Product (name, description, price, warranty_duration, available_quantity, admin_id) VALUES (?, ?, ?, ?, ?, ?)');
-            $stmt->bind_param('sssiii', $name, $desc, $price, $warranty, $qty, $admin_id);
-            if($stmt->execute()) $message = 'Product added!';
+            if ($stmt) {
+                $stmt->bind_param('ssdiii', $name, $desc, $price, $warranty, $qty, $admin_id);
+                if($stmt->execute()) {
+                    $message = 'Product added successfully!';
+                    header('Location: manage_products.php?msg=added');
+                    exit;
+                } else {
+                    $message = 'Insert failed: ' . $conn->error;
+                }
+                $stmt->close();
+            } else {
+                $message = 'Database error: ' . $conn->error;
+            }
         }
-        header('Location: manage_products.php');
-        exit;
     } else {
-        $message = 'Fill all required fields!';
+        $message = 'Please fill all required fields correctly! (Name, Price > 0, Quantity >= 0)';
     }
 }
 ?>

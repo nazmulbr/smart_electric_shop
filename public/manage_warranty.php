@@ -6,19 +6,37 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 require_once '../config/db.php';
 
+$msg = '';
+if (isset($_GET['msg'])) {
+    $msg = $_GET['msg'] == 'added' ? 'Warranty added successfully!' : ($_GET['msg'] == 'updated' ? 'Warranty updated successfully!' : ($_GET['msg'] == 'deleted' ? 'Warranty deleted successfully!' : ''));
+}
+
 // Handle deletion
 if (isset($_GET['delete'])) {
     $wid = intval($_GET['delete']);
     $stmt = $conn->prepare('DELETE FROM Warranty WHERE warranty_id=?');
-    $stmt->bind_param('i', $wid);
-    $stmt->execute();
-    header('Location: manage_warranty.php');
-    exit;
+    if ($stmt) {
+        $stmt->bind_param('i', $wid);
+        if ($stmt->execute()) {
+            header('Location: manage_warranty.php?msg=deleted');
+            exit;
+        } else {
+            $msg = 'Delete failed: ' . $conn->error;
+        }
+        $stmt->close();
+    } else {
+        $msg = 'Database error: ' . $conn->error;
+    }
 }
 
 // Get warranties
-$result = $conn->query('SELECT w.*, u.name as user_name FROM Warranty w LEFT JOIN User u ON w.warranty_id = u.warranty_id');
-$warranties = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+$warranties = [];
+$result = $conn->query('SELECT w.*, u.name as user_name FROM Warranty w LEFT JOIN User u ON w.warranty_id = u.warranty_id ORDER BY w.warranty_id DESC');
+if ($result) {
+    $warranties = $result->fetch_all(MYSQLI_ASSOC);
+} else {
+    $msg = 'Error loading warranties: ' . $conn->error;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -29,6 +47,9 @@ $warranties = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 <body class="bg-light">
     <div class="container mt-4">
         <h4>Warranty Management</h4>
+        <?php if ($msg): ?>
+            <div class="alert alert-<?=strpos($msg, 'failed') !== false || strpos($msg, 'Error') !== false ? 'danger' : 'success'?>"><?=htmlspecialchars($msg)?></div>
+        <?php endif; ?>
         <div class="mb-2">
             <a href="admin_dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
             <a href="warranty_form.php" class="btn btn-success">Add Warranty</a>

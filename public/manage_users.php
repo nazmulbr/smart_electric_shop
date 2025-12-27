@@ -6,19 +6,37 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 require_once '../config/db.php';
 
+$msg = '';
+if (isset($_GET['msg'])) {
+    $msg = $_GET['msg'] == 'added' ? 'User added successfully!' : ($_GET['msg'] == 'updated' ? 'User updated successfully!' : ($_GET['msg'] == 'deleted' ? 'User deleted successfully!' : ''));
+}
+
 // Handle deletion
 if (isset($_GET['delete'])) {
     $uid = intval($_GET['delete']);
     $stmt = $conn->prepare('DELETE FROM User WHERE user_id=?');
-    $stmt->bind_param('i', $uid);
-    $stmt->execute();
-    header('Location: manage_users.php');
-    exit;
+    if ($stmt) {
+        $stmt->bind_param('i', $uid);
+        if ($stmt->execute()) {
+            header('Location: manage_users.php?msg=deleted');
+            exit;
+        } else {
+            $msg = 'Delete failed: ' . $conn->error;
+        }
+        $stmt->close();
+    } else {
+        $msg = 'Database error: ' . $conn->error;
+    }
 }
 
 // Get users
-$result = $conn->query('SELECT * FROM User');
-$users = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+$users = [];
+$result = $conn->query('SELECT * FROM User ORDER BY user_id DESC');
+if ($result) {
+    $users = $result->fetch_all(MYSQLI_ASSOC);
+} else {
+    $msg = 'Error loading users: ' . $conn->error;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -29,6 +47,9 @@ $users = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 <body class="bg-light">
     <div class="container mt-4">
         <h4>User Management</h4>
+        <?php if ($msg): ?>
+            <div class="alert alert-<?=strpos($msg, 'failed') !== false || strpos($msg, 'Error') !== false ? 'danger' : 'success'?>"><?=htmlspecialchars($msg)?></div>
+        <?php endif; ?>
         <div class="mb-2">
             <a href="admin_dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
         </div>

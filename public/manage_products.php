@@ -6,19 +6,37 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin','staff
 }
 require_once '../config/db.php';
 
+$msg = '';
+if (isset($_GET['msg'])) {
+    $msg = $_GET['msg'] == 'added' ? 'Product added successfully!' : ($_GET['msg'] == 'updated' ? 'Product updated successfully!' : '');
+}
+
 // Handle deletion
 if (isset($_GET['delete'])) {
     $pid = intval($_GET['delete']);
     $stmt = $conn->prepare('DELETE FROM Product WHERE product_id=?');
-    $stmt->bind_param('i', $pid);
-    $stmt->execute();
-    header('Location: manage_products.php');
-    exit;
+    if ($stmt) {
+        $stmt->bind_param('i', $pid);
+        if ($stmt->execute()) {
+            header('Location: manage_products.php?msg=deleted');
+            exit;
+        } else {
+            $msg = 'Delete failed: ' . $conn->error;
+        }
+        $stmt->close();
+    } else {
+        $msg = 'Database error: ' . $conn->error;
+    }
 }
 
 // Get products
-$result = $conn->query('SELECT * FROM Product');
-$products = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+$products = [];
+$result = $conn->query('SELECT * FROM Product ORDER BY product_id DESC');
+if ($result) {
+    $products = $result->fetch_all(MYSQLI_ASSOC);
+} else {
+    $msg = 'Error loading products: ' . $conn->error;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -29,6 +47,9 @@ $products = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 <body class="bg-light">
     <div class="container mt-4">
         <h4>Product Management</h4>
+        <?php if ($msg): ?>
+            <div class="alert alert-<?=strpos($msg, 'failed') !== false || strpos($msg, 'Error') !== false ? 'danger' : 'success'?>"><?=htmlspecialchars($msg)?></div>
+        <?php endif; ?>
         <div class="mb-2">
             <a href="admin_dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
             <a href="product_form.php" class="btn btn-success">Add Product</a>

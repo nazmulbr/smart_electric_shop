@@ -24,25 +24,66 @@ if ($isEdit) {
 // Handle POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = intval($_POST['user_id'] ?? 0);
-    $name = $_POST['name'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $phone = $_POST['phone_number'] ?? '';
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone_number'] ?? '');
+    
     if ($name && $email) {
-        if ($id) {
-            $stmt = $conn->prepare('UPDATE User SET name=?, email=?, phone_number=? WHERE user_id=?');
-            $stmt->bind_param('sssi', $name, $email, $phone, $id);
-            if($stmt->execute()) $message = 'User updated!';
+        // Validate email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $message = 'Invalid email format!';
         } else {
-            // Default password for direct create as admin
-            $defaultpw = password_hash('userpass123', PASSWORD_DEFAULT);
-            $stmt = $conn->prepare('INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?)');
-            $stmt->bind_param('ssss', $name, $email, $defaultpw, $phone);
-            if($stmt->execute()) $message = 'User added! Default password: userpass123';
+            if ($id) {
+                // Update existing user
+                $stmt = $conn->prepare('UPDATE User SET name=?, email=?, phone_number=? WHERE user_id=?');
+                if ($stmt) {
+                    $stmt->bind_param('sssi', $name, $email, $phone, $id);
+                    if($stmt->execute()) {
+                        header('Location: manage_users.php?msg=updated');
+                        exit;
+                    } else {
+                        $message = 'Update failed: ' . $conn->error;
+                    }
+                    $stmt->close();
+                } else {
+                    $message = 'Database error: ' . $conn->error;
+                }
+            } else {
+                // Check if email already exists
+                $check_stmt = $conn->prepare('SELECT user_id FROM User WHERE email = ?');
+                if ($check_stmt) {
+                    $check_stmt->bind_param('s', $email);
+                    $check_stmt->execute();
+                    $check_stmt->store_result();
+                    
+                    if ($check_stmt->num_rows == 0) {
+                        $check_stmt->close();
+                        // Default password for direct create as admin
+                        $defaultpw = password_hash('userpass123', PASSWORD_DEFAULT);
+                        $stmt = $conn->prepare('INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?)');
+                        if ($stmt) {
+                            $stmt->bind_param('ssss', $name, $email, $defaultpw, $phone);
+                            if($stmt->execute()) {
+                                header('Location: manage_users.php?msg=added');
+                                exit;
+                            } else {
+                                $message = 'Insert failed: ' . $conn->error;
+                            }
+                            $stmt->close();
+                        } else {
+                            $message = 'Database error: ' . $conn->error;
+                        }
+                    } else {
+                        $message = 'Email already exists!';
+                        $check_stmt->close();
+                    }
+                } else {
+                    $message = 'Database error: ' . $conn->error;
+                }
+            }
         }
-        header('Location: manage_users.php');
-        exit;
     } else {
-        $message = 'Fill all required fields!';
+        $message = 'Please fill all required fields (Name and Email)!';
     }
 }
 ?>
