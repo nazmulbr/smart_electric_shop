@@ -3,6 +3,7 @@
 // Access: http://localhost/smart_electric_shop/public/debug_crud.php
 
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 echo "<h2>CRUD Operations Debug Test</h2>";
 echo "<style>body{font-family:Arial;padding:20px;} .success{color:green;} .error{color:red;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background-color:#4CAF50;color:white;}</style>";
@@ -48,7 +49,7 @@ if ($stmt) {
     if ($stmt->execute()) {
         $inserted_id = $conn->insert_id;
         echo "<p class='success'>✅ INSERT successful! New user ID: " . $inserted_id . "</p>";
-        
+
         // Test 4: Test SELECT operation
         echo "<h3>4. Test SELECT Operation</h3>";
         $select_stmt = $conn->prepare("SELECT * FROM User WHERE user_id = ?");
@@ -68,7 +69,7 @@ if ($stmt) {
             echo "</table>";
         }
         $select_stmt->close();
-        
+
         // Test 5: Test UPDATE operation
         echo "<h3>5. Test UPDATE Operation</h3>";
         $new_name = "Updated Test User";
@@ -80,7 +81,7 @@ if ($stmt) {
             echo "<p class='error'>❌ UPDATE failed: " . $conn->error . "</p>";
         }
         $update_stmt->close();
-        
+
         // Test 6: Test DELETE operation
         echo "<h3>6. Test DELETE Operation</h3>";
         $delete_stmt = $conn->prepare("DELETE FROM User WHERE user_id = ?");
@@ -91,7 +92,6 @@ if ($stmt) {
             echo "<p class='error'>❌ DELETE failed: " . $conn->error . "</p>";
         }
         $delete_stmt->close();
-        
     } else {
         echo "<p class='error'>❌ INSERT failed: " . $conn->error . "</p>";
     }
@@ -116,5 +116,3 @@ foreach ($tables as $table) {
 echo "</table>";
 
 echo "<br><a href='index.php'>Back to Home</a> | <a href='test_db.php'>Database Test</a>";
-?>
-

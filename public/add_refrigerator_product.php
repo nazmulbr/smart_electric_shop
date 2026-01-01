@@ -1,13 +1,9 @@
 <?php
 session_start();
-require_once '../config/db.php';
+// Require admin or staff access
+require_once 'includes/admin_auth.php';
 require_once '../config/error_handler.php';
-
-// Check if user is admin or staff
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'staff'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once '../config/db.php';
 
 $message = '';
 $success = false;

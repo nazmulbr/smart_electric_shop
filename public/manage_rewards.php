@@ -1,18 +1,20 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: login.php'); exit;
-}
+// Require admin-only access
+$require_role = 'admin';
+require_once 'includes/admin_auth.php';
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 $result = $conn->query('SELECT r.points_id, u.name as user_name, r.points FROM RewardPoints r JOIN User u ON r.user_id = u.user_id');
 $rewards = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Reward Points Management - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container mt-4">
         <h4>Manage Reward Points</h4>
@@ -22,22 +24,27 @@ $rewards = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
         </div>
         <table class="table table-bordered bg-white">
             <thead class="thead-dark">
-                <tr><th>#</th><th>User</th><th>Points</th><th>Actions</th></tr>
+                <tr>
+                    <th>#</th>
+                    <th>User</th>
+                    <th>Points</th>
+                    <th>Actions</th>
+                </tr>
             </thead>
             <tbody>
                 <?php foreach ($rewards as $rw): ?>
-                <tr>
-                    <td><?=htmlspecialchars($rw['points_id'])?></td>
-                    <td><?=htmlspecialchars($rw['user_name'])?></td>
-                    <td><?=htmlspecialchars($rw['points'])?></td>
-                    <td>
-                        <a href="reward_form.php?edit=<?=$rw['points_id']?>" class="btn btn-primary btn-sm">Edit</a>
-                    </td>
-                </tr>
+                    <tr>
+                        <td><?= htmlspecialchars($rw['points_id']) ?></td>
+                        <td><?= htmlspecialchars($rw['user_name']) ?></td>
+                        <td><?= htmlspecialchars($rw['points']) ?></td>
+                        <td>
+                            <a href="reward_form.php?edit=<?= $rw['points_id'] ?>" class="btn btn-primary btn-sm">Edit</a>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 </body>
-</html>
 
+</html>

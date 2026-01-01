@@ -1,11 +1,10 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'staff') {
-    header('Location: login.php');
-    exit;
-}
+// Require staff-only access
+$require_role = 'staff';
+require_once 'includes/admin_auth.php';
 require_once '../config/db.php';
-$name = $_SESSION['name'];
+require_once '../config/error_handler.php';
+$name = $current_admin_name;
 $email = $_SESSION['email'];
 ?>
 <!DOCTYPE html>

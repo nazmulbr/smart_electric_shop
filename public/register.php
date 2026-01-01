@@ -5,6 +5,9 @@ require_once '../config/error_handler.php';
 require_once '../config/db.php';
 require_once '../config/db_check.php';
 
+// Enable mysqli exceptions for clearer error handling
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 // Check if User table exists
 if (!checkTableExists('User')) {
     die(showTableError('User', 'User Registration'));
@@ -21,59 +24,60 @@ if ($conn->connect_error) {
     $register_err = 'Database connection failed. Please check your configuration.';
 } else {
     if ($_SERVER["REQUEST_METHOD"] === 'POST') {
-        $name = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $phone_number = trim($_POST['phone_number'] ?? '');
+        try {
+            $name = trim($_POST['name'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $phone_number = trim($_POST['phone_number'] ?? '');
 
-        if ($name && $email && $password) {
-            // Validate email format
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $register_err = 'Invalid email format.';
+            if (!$name || !$email || !$password) {
+                $register_err = 'Please fill all required fields (Name, Email, Password)!';
             } else {
-                // Check if user exists
-                $check_stmt = $conn->prepare("SELECT user_id FROM User WHERE email = ?");
-                if ($check_stmt) {
-                    $check_stmt->bind_param('s', $email);
-                    $check_stmt->execute();
-                    $check_stmt->store_result();
+                // Validate email format
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $register_err = 'Invalid email format.';
+                } else {
+                    // Enforce password policy: at least 8 chars, contains letters and digits
+                    if (strlen($password) < 8 || !preg_match('/[0-9]/', $password) || !preg_match('/[A-Za-z]/', $password)) {
+                        $register_err = 'Password must be at least 8 characters long and contain both letters and numbers.';
+                    } else {
+                        // Check if user exists
+                        $check_stmt = $conn->prepare("SELECT user_id FROM User WHERE email = ?");
+                        if (!$check_stmt) throw new Exception("Prepare failed (check user): " . $conn->error);
+                        $check_stmt->bind_param('s', $email);
+                        $check_stmt->execute();
+                        $check_stmt->store_result();
 
-                    if ($check_stmt->num_rows == 0) {
-                        $check_stmt->close();
+                        if ($check_stmt->num_rows == 0) {
+                            $check_stmt->close();
 
-                        // Hash password
-                        $hashed = password_hash($password, PASSWORD_DEFAULT);
+                            // Hash password
+                            $hashed = password_hash($password, PASSWORD_DEFAULT);
 
-                        // Insert new user
-                        $insert_stmt = $conn->prepare("INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?)");
-                        if ($insert_stmt) {
+                            // Insert new user
+                            $insert_stmt = $conn->prepare("INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?)");
+                            if (!$insert_stmt) throw new Exception("Prepare failed (insert user): " . $conn->error);
                             $insert_stmt->bind_param('ssss', $name, $email, $hashed, $phone_number);
                             if ($insert_stmt->execute()) {
                                 $register_msg = 'Registration successful! <a href="login.php">Login Now</a>';
                                 // Clear form data
                                 $name = $email = $phone_number = '';
                             } else {
+                                // Detailed DB error
                                 $register_err = showDbError($conn, "User Registration");
-                                $register_err .= "<strong>Details:</strong><br>";
-                                $register_err .= "Error Code: " . $conn->errno . "<br>";
-                                $register_err .= "SQL State: " . $conn->sqlstate . "<br>";
-                                $register_err .= "Attempted Query: INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?)<br>";
-                                $register_err .= "Parameters: name='$name', email='$email', phone='$phone_number'";
+                                $register_err .= "<strong>Attempted Query:</strong><br>INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?) <br>";
+                                $register_err .= "<strong>Parameters:</strong> name='" . htmlspecialchars($name) . "', email='" . htmlspecialchars($email) . "', phone='" . htmlspecialchars($phone_number) . "'";
                             }
                             $insert_stmt->close();
                         } else {
-                            $register_err = showDbError($conn, "Preparing INSERT statement");
+                            $register_err = 'Email already registered. Please use a different email.';
+                            $check_stmt->close();
                         }
-                    } else {
-                        $register_err = 'Email already registered. Please use a different email.';
-                        $check_stmt->close();
                     }
-                } else {
-                    $register_err = showDbError($conn, "Checking for existing user");
                 }
             }
-        } else {
-            $register_err = 'Please fill all required fields (Name, Email, Password)!';
+        } catch (Exception $e) {
+            $register_err = "<div class='alert alert-danger'><strong>Exception:</strong> " . htmlspecialchars($e->getMessage()) . "</div>";
         }
     }
 }
@@ -317,7 +321,8 @@ if ($conn->connect_error) {
                         </div>
                         <div class="form-group">
                             <label><i class="fas fa-lock"></i> Password</label>
-                            <input type="password" name="password" class="form-control" required />
+                            <input type="password" name="password" class="form-control" required minlength="8" pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" title="At least 8 characters, including letters and numbers" />
+                            <small class="form-text text-muted">Password must be at least 8 characters and contain both letters and numbers.</small>
                         </div>
                         <div class="form-group">
                             <label><i class="fas fa-phone"></i> Phone Number</label>

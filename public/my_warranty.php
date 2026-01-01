@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     exit;
 }
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 $user_id = $_SESSION['user_id'];
 // Find user's warranty (if linked by user.warranty_id or via last purchase)
 $stmt = $conn->prepare('SELECT w.* FROM Warranty w JOIN User u ON w.warranty_id=u.warranty_id WHERE u.user_id=?');

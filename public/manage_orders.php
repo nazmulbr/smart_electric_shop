@@ -1,10 +1,8 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'staff'])) {
-    header('Location: login.php');
-    exit;
-}
+// Require admin or staff access
+require_once 'includes/admin_auth.php';
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 $result = $conn->query('SELECT o.*, u.name as user_name FROM `Order` o JOIN User u ON o.user_id = u.user_id ORDER BY o.order_date DESC');
 $orders = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];

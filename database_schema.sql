@@ -166,9 +166,6 @@ CREATE TABLE CanCheckOrder (
 -- Create default Main Admin
 INSERT INTO Main_Admin (main_id, name) VALUES (1, 'System Administrator');
 
--- Create default Admin account
--- Default password: admin123 (change after first login!)
--- Password hash for 'admin123'
 INSERT INTO Admin (main_id, name, email, password, phone_number) 
-VALUES (1, 'Administrator', 'admin@smartelectric.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '1234567890');
+VALUES (1, 'Administrator', 'admin@smartelectric.com', 'admin123', '1234567890');
 

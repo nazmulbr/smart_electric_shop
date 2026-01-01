@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 $result = $conn->query('SELECT * FROM Product');
 $products = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 $added = '';

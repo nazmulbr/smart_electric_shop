@@ -1,11 +1,10 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: login.php');
-    exit;
-}
+// Require admin-only access
+$require_role = 'admin';
+require_once 'includes/admin_auth.php';
 require_once '../config/db.php';
-$name = $_SESSION['name'];
+require_once '../config/error_handler.php';
+$name = $current_admin_name;
 $email = $_SESSION['email'];
 ?>
 <!DOCTYPE html>

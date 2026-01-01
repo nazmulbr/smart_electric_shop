@@ -1,3 +1,4 @@
+require_once '../config/error_handler.php';
 <?php
 session_start();
 session_unset();

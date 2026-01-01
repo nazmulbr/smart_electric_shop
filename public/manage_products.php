@@ -1,9 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin','staff'])) {
-    header('Location: login.php');
-    exit;
-}
+// Require admin or staff access
+require_once 'includes/admin_auth.php';
 require_once '../config/error_handler.php';
 require_once '../config/db.php';
 require_once '../config/db_check.php';

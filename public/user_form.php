@@ -1,9 +1,7 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: login.php');
-    exit;
-}
+// Require admin-only access
+$require_role = 'admin';
+require_once 'includes/admin_auth.php';
 require_once '../config/error_handler.php';
 require_once '../config/db.php';
 require_once '../config/db_check.php';
@@ -16,7 +14,10 @@ if (!checkTableExists('User')) {
 $isEdit = isset($_GET['edit']);
 $message = '';
 $u = [
-    'user_id'=>'', 'name'=>'', 'email'=>'', 'phone_number'=>''
+    'user_id' => '',
+    'name' => '',
+    'email' => '',
+    'phone_number' => ''
 ];
 
 // Editing?
@@ -34,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone_number'] ?? '');
-    
+
     if ($name && $email) {
         // Validate email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -45,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $conn->prepare('UPDATE User SET name=?, email=?, phone_number=? WHERE user_id=?');
                 if ($stmt) {
                     $stmt->bind_param('sssi', $name, $email, $phone, $id);
-                    if($stmt->execute()) {
+                    if ($stmt->execute()) {
                         header('Location: manage_users.php?msg=updated');
                         exit;
                     } else {
@@ -66,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $check_stmt->bind_param('s', $email);
                     $check_stmt->execute();
                     $check_stmt->store_result();
-                    
+
                     if ($check_stmt->num_rows == 0) {
                         $check_stmt->close();
                         // Default password for direct create as admin
@@ -74,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt = $conn->prepare('INSERT INTO User (name, email, password, phone_number) VALUES (?, ?, ?, ?)');
                         if ($stmt) {
                             $stmt->bind_param('ssss', $name, $email, $defaultpw, $phone);
-                            if($stmt->execute()) {
+                            if ($stmt->execute()) {
                                 header('Location: manage_users.php?msg=added');
                                 exit;
                             } else {
@@ -104,10 +105,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title><?= $isEdit ? 'Edit' : 'Add' ?> User - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container mt-4">
         <a href="manage_users.php" class="btn btn-secondary mb-2">Back to Users</a>
@@ -117,8 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="card-body">
                 <?php if ($message): ?>
-                    <div class="alert alert-<?=strpos($message, 'failed') !== false || strpos($message, 'Error') !== false || strpos($message, 'error') !== false ? 'danger' : 'info'?>">
-                        <?php 
+                    <div class="alert alert-<?= strpos($message, 'failed') !== false || strpos($message, 'Error') !== false || strpos($message, 'error') !== false ? 'danger' : 'info' ?>">
+                        <?php
                         // Check if it's already HTML formatted (from showDbError)
                         if (strpos($message, '<div') !== false || strpos($message, '<strong') !== false) {
                             echo $message;
@@ -148,5 +151,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </body>
-</html>
 
+</html>

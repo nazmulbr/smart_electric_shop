@@ -3,6 +3,7 @@
 // Access this file to test your database connection: http://localhost/smart_electric_shop/public/test_db.php
 
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 echo "<h2>Database Connection Test</h2>";
 

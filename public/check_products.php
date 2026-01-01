@@ -1,5 +1,6 @@
 <?php
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 echo "<h2>Database Check</h2>";
 

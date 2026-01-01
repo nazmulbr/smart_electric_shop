@@ -1,12 +1,8 @@
 <?php
-session_start();
-require_once '../config/db.php';
+// Require admin or staff access
+require_once 'includes/admin_auth.php';
 require_once '../config/error_handler.php';
-
-// Check if user is admin or staff
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'staff'])) {
-    die('Unauthorized access. Please login as admin or staff.');
-}
+require_once '../config/db.php';
 
 // Product details for WFC-3F5-GDEL-XX
 $product_name = "WFC-3F5-GDEL-XX (INVERTER)";

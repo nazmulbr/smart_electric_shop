@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 if (!isset($_GET['product_id'])) {
     header('Location: index.php');
@@ -79,6 +80,11 @@ if (!empty($product['images'])) {
                     <div class="col-md-6">
                         <h2><?= htmlspecialchars($product['name']) ?></h2>
                         <h4 class="text-success">৳ <?= number_format($product['price'], 2) ?></h4>
+                        <?php
+                        // Show reward points earned for this product (1 point per 100 BDT)
+                        $points_for_product = floor($product['price'] / 100);
+                        ?>
+                        <p class="text-muted">Earn <strong><?= $points_for_product ?></strong> point(s) on purchase. (1 point = ৳1)</p>
                         <p><?= nl2br(htmlspecialchars($product['description'])) ?></p>
                         <ul>
                             <?php if (!empty($product['category'])): ?><li><strong>Category:</strong> <?= htmlspecialchars($product['category']) ?></li><?php endif; ?>

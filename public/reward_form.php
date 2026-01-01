@@ -1,9 +1,9 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: login.php'); exit;
-}
+// Require admin-only access
+$require_role = 'admin';
+require_once 'includes/admin_auth.php';
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 $isEdit = isset($_GET['edit']);
 $message = '';
@@ -34,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param('ii', $user_id, $points);
             $stmt->execute();
         }
-        header('Location: manage_rewards.php'); exit;
+        header('Location: manage_rewards.php');
+        exit;
     } else {
         $message = 'All fields required!';
     }
@@ -46,38 +47,41 @@ if ($res) $users = $res->fetch_all(MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title><?= $isEdit?'Edit':'Add'?> Reward Points - Smart Electric Shop</title>
+    <title><?= $isEdit ? 'Edit' : 'Add' ?> Reward Points - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container mt-4">
         <a href="manage_rewards.php" class="btn btn-secondary mb-2">Back to Rewards</a>
         <div class="card">
             <div class="card-header">
-                <h4><?= $isEdit?'Edit':'Add'?> Reward Points</h4>
+                <h4><?= $isEdit ? 'Edit' : 'Add' ?> Reward Points</h4>
             </div>
             <div class="card-body">
-            <?php if ($message): ?><div class="alert alert-info"><?=$message?></div><?php endif; ?>
-            <form method="POST">
-                <input type="hidden" name="points_id" value="<?=htmlspecialchars($points_id)?>" />
-                <div class="form-group">
-                    <label>User</label>
-                    <select name="user_id" class="form-control" required <?= $isEdit?'disabled':'';?>>
-                        <option value="">Select User</option>
-                        <?php foreach($users as $u): ?>
-                        <option value="<?=$u['user_id']?>" <?=($u['user_id']==$user_id)?'selected':''?>><?=$u['name']?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Points</label>
-                    <input type="number" name="points" value="<?=htmlspecialchars($points)?>" class="form-control" required />
-                </div>
-                <button type="submit" class="btn btn-success"><?=$isEdit?'Update':'Add'?> Reward</button>
-            </form>
+                <?php if ($message): ?><div class="alert alert-info"><?= $message ?></div><?php endif; ?>
+                <form method="POST">
+                    <input type="hidden" name="points_id" value="<?= htmlspecialchars($points_id) ?>" />
+                    <div class="form-group">
+                        <label>User</label>
+                        <select name="user_id" class="form-control" required <?= $isEdit ? 'disabled' : ''; ?>>
+                            <option value="">Select User</option>
+                            <?php foreach ($users as $u): ?>
+                                <option value="<?= $u['user_id'] ?>" <?= ($u['user_id'] == $user_id) ? 'selected' : '' ?>><?= $u['name'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Points</label>
+                        <input type="number" name="points" value="<?= htmlspecialchars($points) ?>" class="form-control" required />
+                    </div>
+                    <button type="submit" class="btn btn-success"><?= $isEdit ? 'Update' : 'Add' ?> Reward</button>
+                </form>
             </div>
         </div>
     </div>
 </body>
+
 </html>

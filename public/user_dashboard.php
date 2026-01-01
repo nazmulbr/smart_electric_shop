@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     exit;
 }
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 $name = $_SESSION['name'];
 $email = $_SESSION['email'];
 ?>

@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     exit;
 }
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 $user_id = $_SESSION['user_id'];
 $message = '';
@@ -55,24 +56,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     $payment_method = $_POST['payment_method'] ?? 'Cash';
     $use_rewards = isset($_POST['use_rewards']) ? true : false;
 
-    // Get reward points
+    // Get reward points and compute discount (1 point = 1 BDT)
     $points_used = 0;
     $points_discount = 0;
     if ($use_rewards) {
         $stmt = $conn->prepare('SELECT points FROM RewardPoints WHERE user_id = ?');
-        $stmt->bind_param('i', $user_id);
-        $stmt->execute();
-        $stmt->bind_result($user_points);
-        if ($stmt->fetch() && $user_points > 0) {
-            // Convert points to discount (e.g., 100 points = 10 BDT)
-            $points_discount = min($user_points / 10, $total * 0.1); // Max 10% discount
-            $points_used = $points_discount * 10;
+        if ($stmt) {
+            $stmt->bind_param('i', $user_id);
+            $stmt->execute();
+            $stmt->bind_result($user_points);
+            $stmt->fetch();
+            $stmt->close();
+            $user_points = intval($user_points ?: 0);
+            if ($user_points > 0) {
+                // Use up to available points but not more than the order total
+                $points_used = min($user_points, floor($total));
+                $points_discount = $points_used; // 1 point = 1 BDT
+            }
         }
-        $stmt->close();
     }
 
-    $final_total = $total - $points_discount;
-    $discount_amount = $total - $final_total;
+    $final_total = max(0, $total - $points_discount);
+    $discount_amount = $points_discount;
 
     // Create order
     $stmt = $conn->prepare('INSERT INTO `Order` (user_id, order_date, payment_status, total_amount, discount) VALUES (?, NOW(), ?, ?, ?)');
@@ -108,9 +113,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
     // Update reward points (deduct used, add earned)
     $points_earned = floor($final_total / 100); // 1 point per 100 BDT
-    $stmt = $conn->prepare('INSERT INTO RewardPoints (user_id, points) VALUES (?, ?) ON DUPLICATE KEY UPDATE points = points + ? - ?');
-    $stmt->bind_param('iiii', $user_id, $points_earned, $points_earned, $points_used);
-    $stmt->execute();
+
+    // Read existing points
+    $current_points = 0;
+    $stmt = $conn->prepare('SELECT points FROM RewardPoints WHERE user_id = ?');
+    if ($stmt) {
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $stmt->bind_result($current_points);
+        $stmt->fetch();
+        $stmt->close();
+    }
+    $current_points = intval($current_points ?: 0);
+
+    $new_points = $current_points - $points_used + $points_earned;
+    if ($new_points < 0) $new_points = 0;
+
+    // Upsert new points
+    $check = $conn->prepare('SELECT points_id FROM RewardPoints WHERE user_id = ?');
+    if ($check) {
+        $check->bind_param('i', $user_id);
+        $check->execute();
+        $check->store_result();
+        if ($check->num_rows > 0) {
+            $check->close();
+            $up = $conn->prepare('UPDATE RewardPoints SET points = ? WHERE user_id = ?');
+            if ($up) {
+                $up->bind_param('ii', $new_points, $user_id);
+                $up->execute();
+                $up->close();
+            }
+        } else {
+            $check->close();
+            $ins = $conn->prepare('INSERT INTO RewardPoints (user_id, points) VALUES (?, ?)');
+            if ($ins) {
+                $ins->bind_param('ii', $user_id, $new_points);
+                $ins->execute();
+                $ins->close();
+            }
+        }
+    }
 
     // Link order to admin (for management)
     $admin_result = $conn->query('SELECT admin_id FROM Admin LIMIT 1');

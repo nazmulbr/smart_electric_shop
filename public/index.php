@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 require_once '../config/db_check.php';
 
 // Check if database is set up

@@ -13,11 +13,13 @@ require_once '../config/db.php';
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page_title) ? $page_title : 'Smart Electric Shop' ?></title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/theme.css">
     <script src="js/error_handler.js"></script>
     <style>
         .error-details {
@@ -27,14 +29,16 @@ require_once '../config/db.php';
             margin: 10px 0;
             font-family: Arial;
         }
+
         .error-details strong {
             color: #d32f2f;
         }
+
         .error-details small {
             color: #666;
             font-size: 0.9em;
         }
     </style>
 </head>
-<body>
 
+<body>

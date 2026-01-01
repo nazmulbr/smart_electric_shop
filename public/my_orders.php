@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     exit;
 }
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 $user_id = $_SESSION['user_id'];
 $stmt = $conn->prepare('SELECT * FROM `Order` WHERE user_id = ? ORDER BY order_date DESC');

@@ -1,6 +1,7 @@
 <?php
 // Direct database insertion script
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 // Product details for WFC-3F5-GDEL-XX
 $product_name = "WFC-3F5-GDEL-XX (INVERTER)";

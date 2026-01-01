@@ -6,6 +6,7 @@
  */
 
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 require_once '../config/db_check.php';
 
 $message = '';
@@ -35,10 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_default_admin'
         $conn->query("INSERT INTO Main_Admin (main_id, name) VALUES (1, 'System Administrator')");
     }
 
-    // Create default admin account
+    // Create default admin account (store password as plaintext per request)
     $email = 'admin@smartelectric.com';
     $password = 'admin123';
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+    $passwordHash = $password;
 
     $checkStmt = $conn->prepare("SELECT admin_id FROM Admin WHERE email = ?");
     $checkStmt->bind_param('s', $email);

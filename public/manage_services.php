@@ -1,9 +1,9 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: login.php'); exit;
-}
+// Require admin-only access
+$require_role = 'admin';
+require_once 'includes/admin_auth.php';
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 $message = '';
 // Handle status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -21,42 +21,52 @@ $requests = $requests ? $requests->fetch_all(MYSQLI_ASSOC) : [];
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Service Requests Management - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container mt-4">
         <h4>All Service Requests</h4>
-        <?php if ($message): ?><div class="alert alert-info"><?=$message?></div><?php endif; ?>
+        <?php if ($message): ?><div class="alert alert-info"><?= $message ?></div><?php endif; ?>
         <a href="admin_dashboard.php" class="btn btn-secondary mb-2">Back to Dashboard</a>
         <table class="table table-bordered bg-white col-md-12">
             <thead class="thead-dark">
-                <tr><th>ID</th><th>User</th><th>Warranty Purchase</th><th>Issue</th><th>Status</th><th>Update</th></tr>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Warranty Purchase</th>
+                    <th>Issue</th>
+                    <th>Status</th>
+                    <th>Update</th>
+                </tr>
             </thead>
             <tbody>
-                <?php foreach($requests as $r): ?>
-                <tr>
-                    <td><?=$r['request_id']?></td>
-                    <td><?=htmlspecialchars($r['user_name'])?></td>
-                    <td><?=$r['purchase_date']?></td>
-                    <td><?=htmlspecialchars($r['issue'])?></td>
-                    <td><?=htmlspecialchars($r['status'])?></td>
-                    <td>
-                        <form method="POST" class="form-inline">
-                            <input type="hidden" name="request_id" value="<?=$r['request_id']?>">
-                            <select name="status" class="form-control mr-1">
-                                <?php foreach(['Open','In Progress','Resolved','Rejected'] as $stat): ?>
-                                <option value="<?=$stat?>" <?=$r['status']==$stat?'selected':''?>><?=$stat?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                        </form>
-                    </td>
-                </tr>
+                <?php foreach ($requests as $r): ?>
+                    <tr>
+                        <td><?= $r['request_id'] ?></td>
+                        <td><?= htmlspecialchars($r['user_name']) ?></td>
+                        <td><?= $r['purchase_date'] ?></td>
+                        <td><?= htmlspecialchars($r['issue']) ?></td>
+                        <td><?= htmlspecialchars($r['status']) ?></td>
+                        <td>
+                            <form method="POST" class="form-inline">
+                                <input type="hidden" name="request_id" value="<?= $r['request_id'] ?>">
+                                <select name="status" class="form-control mr-1">
+                                    <?php foreach (['Open', 'In Progress', 'Resolved', 'Rejected'] as $stat): ?>
+                                        <option value="<?= $stat ?>" <?= $r['status'] == $stat ? 'selected' : '' ?>><?= $stat ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                            </form>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 </body>
+
 </html>

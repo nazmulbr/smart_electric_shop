@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     exit;
 }
 require_once '../config/db.php';
+require_once '../config/error_handler.php';
 
 $user_id = $_SESSION['user_id'];
 $message = '';
@@ -24,13 +25,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 // Get my requests
+// Get my requests (use get_result once)
 $stmt = $conn->prepare('SELECT s.*, w.purchase_date FROM ServiceRequest s LEFT JOIN Warranty w ON s.warranty_id = w.warranty_id WHERE s.user_id = ? ORDER BY s.request_id DESC');
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
-$requests = $stmt->get_result() ? $stmt->get_result()->fetch_all(MYSQLI_ASSOC) : [];
-// Get warranties for dropdown
-$warrs = $conn->query("SELECT warranty_id, purchase_date FROM Warranty WHERE warranty_id IN (SELECT warranty_id FROM User WHERE user_id = $user_id)");
-$warranty_options = $warrs ? $warrs->fetch_all(MYSQLI_ASSOC) : [];
+$res = $stmt->get_result();
+$requests = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+$stmt->close();
+// Get warranties for dropdown (prepared statement)
+$wstmt = $conn->prepare("SELECT w.warranty_id, w.purchase_date FROM Warranty w JOIN User u ON u.warranty_id = w.warranty_id WHERE u.user_id = ?");
+if ($wstmt) {
+    $wstmt->bind_param('i', $user_id);
+    $wstmt->execute();
+    $wres = $wstmt->get_result();
+    $warranty_options = $wres ? $wres->fetch_all(MYSQLI_ASSOC) : [];
+    $wstmt->close();
+} else {
+    $warranty_options = [];
+}
 ?>
 <!DOCTYPE html>
 <html>

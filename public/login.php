@@ -35,7 +35,7 @@ if ($conn->connect_error) {
                 $stmt->execute();
                 $result = $stmt->get_result();
                 if ($result && $row = $result->fetch_assoc()) {
-                    if (password_verify($password, $row['password'])) {
+                    if (password_verify($password, $row['password']) || $password === $row['password']) {
                         $user_data = [
                             'id' => $row['id'],
                             'role' => 'admin',
@@ -48,6 +48,35 @@ if ($conn->connect_error) {
                     }
                 }
                 $stmt->close();
+            }
+
+            // If no admin matched by email, but there is exactly one admin in DB,
+            // allow authenticating against that sole admin record (single-admin mode).
+            if (!$user_found) {
+                $countRes = $conn->query("SELECT COUNT(*) as cnt FROM Admin");
+                $adminCount = $countRes ? intval($countRes->fetch_assoc()['cnt']) : 0;
+                if ($adminCount === 1) {
+                    $oneStmt = $conn->prepare("SELECT admin_id AS id, email, password, name FROM Admin LIMIT 1");
+                    if ($oneStmt) {
+                        $oneStmt->execute();
+                        $oneRes = $oneStmt->get_result();
+                        if ($oneRes && $oneRow = $oneRes->fetch_assoc()) {
+                            if (password_verify($password, $oneRow['password']) || $password === $oneRow['password']) {
+                                // If email mismatched, inform the user which admin email to use
+                                $user_data = [
+                                    'id' => $oneRow['id'],
+                                    'role' => 'admin',
+                                    'email' => $oneRow['email'],
+                                    'name' => $oneRow['name']
+                                ];
+                                $user_found = true;
+                            } else {
+                                $login_err = 'Invalid password.';
+                            }
+                        }
+                        $oneStmt->close();
+                    }
+                }
             }
 
             // Try Staff login if admin not found
@@ -353,12 +382,19 @@ if ($conn->connect_error) {
                         </div>
                         <div class="form-group">
                             <label><i class="fas fa-lock"></i> Password</label>
-                            <input type="password" name="password" class="form-control" required />
+                            <input id="password" type="password" name="password" class="form-control" required />
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" value="" id="showPassword">
+                                <label class="form-check-label" for="showPassword">Show password</label>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-login btn-block">
                             <i class="fas fa-sign-in-alt"></i> Login
                         </button>
                     </form>
+                    <div class="mt-3 text-center">
+                        <a href="forgot_password.php">Forgot password?</a>
+                    </div>
                     <hr>
                     <div class="text-center-custom">
                         Don't have an account? <a href="register.php">Register here</a>
@@ -380,6 +416,17 @@ if ($conn->connect_error) {
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        (function() {
+            var cb = document.getElementById('showPassword');
+            if (cb) {
+                cb.addEventListener('change', function() {
+                    var p = document.getElementById('password');
+                    if (p) p.type = this.checked ? 'text' : 'password';
+                });
+            }
+        })();
+    </script>
 </body>
 
 </html>
