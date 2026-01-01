@@ -164,15 +164,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                                 <tr>
                                     <td><?= htmlspecialchars($item['name']) ?></td>
                                     <td><?= $item['quantity'] ?></td>
-                                    <td><?= number_format($item['discounted_price'], 2) ?></td>
-                                    <td><?= number_format($item['item_total'], 2) ?></td>
+                                    <td>৳ <?= number_format($item['discounted_price'], 2) ?></td>
+                                    <td>৳ <?= number_format($item['item_total'], 2) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                         <tfoot>
                             <tr>
                                 <th colspan="3">Subtotal</th>
-                                <th><?= number_format($total, 2) ?></th>
+                                <th>৳ <?= number_format($total, 2) ?></th>
                             </tr>
                         </tfoot>
                     </table>
@@ -206,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                                     </div>
                                 <?php endif; ?>
                                 <div class="mt-3">
-                                    <strong>Total: <?= number_format($total, 2) ?> BDT</strong>
+                                    <strong>Total: ৳ <?= number_format($total, 2) ?></strong>
                                 </div>
                                 <button type="submit" name="place_order" class="btn btn-success btn-block mt-3">Place Order</button>
                             </form>

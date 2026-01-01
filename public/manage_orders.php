@@ -11,10 +11,12 @@ $orders = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Manage Orders - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container mt-4">
         <h4>Order Management</h4>
@@ -24,26 +26,33 @@ $orders = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
         <table class="table table-bordered bg-white">
             <thead class="thead-dark">
                 <tr>
-                    <th>ID</th><th>User</th><th>Date</th><th>Total</th><th>Discount</th><th>Status</th><th>Actions</th>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Discount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($orders as $o): ?>
-                <tr>
-                    <td><?=htmlspecialchars($o['order_id'])?></td>
-                    <td><?=htmlspecialchars($o['user_name'])?></td>
-                    <td><?=htmlspecialchars($o['order_date'])?></td>
-                    <td><?=htmlspecialchars($o['total_amount'])?></td>
-                    <td><?=htmlspecialchars($o['discount'])?></td>
-                    <td><?=htmlspecialchars($o['payment_status'])?></td>
-                    <td>
-                        <a href="order_items.php?order_id=<?=$o['order_id']?>" class="btn btn-primary btn-sm">View Items</a>
-                        <a href="update_order_status.php?order_id=<?=$o['order_id']?>" class="btn btn-warning btn-sm">Update Status</a>
-                    </td>
-                </tr>
+                    <tr>
+                        <td><?= htmlspecialchars($o['order_id']) ?></td>
+                        <td><?= htmlspecialchars($o['user_name']) ?></td>
+                        <td><?= htmlspecialchars($o['order_date']) ?></td>
+                        <td>৳ <?= number_format($o['total_amount'], 2) ?></td>
+                        <td>৳ <?= number_format($o['discount'], 2) ?></td>
+                        <td><?= htmlspecialchars($o['payment_status']) ?></td>
+                        <td>
+                            <a href="order_items.php?order_id=<?= $o['order_id'] ?>" class="btn btn-primary btn-sm">View Items</a>
+                            <a href="update_order_status.php?order_id=<?= $o['order_id'] ?>" class="btn btn-warning btn-sm">Update Status</a>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 </body>
+
 </html>

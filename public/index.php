@@ -677,281 +677,215 @@ if (checkTableExists('Product')) {
             <p>Browse our premium collection of electrical products with warranty and energy usage information.</p>
         </div>
 
-        <!-- Feature Cards -->
-        <div class="row mt-5">
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="card-body text-center">
-                        <div class="feature-card-icon">
-                            <i class="fas fa-shopping-bag"></i>
-                        </div>
-                        <h5 class="card-title">Quality Products</h5>
-                        <p class="card-text">Browse and purchase electrical products with detailed specifications.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="my_warranty.php" class="feature-card-link">
-                        <div class="feature-card">
-                            <div class="card-body text-center">
-                                <div class="feature-card-icon">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <h5 class="card-title">Warranty Tracking</h5>
-                                <p class="card-text">Track your product warranties and get notified before expiry.</p>
-                            </div>
-                        </div>
-                    </a>
-                <?php else: ?>
-                    <a href="login.php" class="feature-card-link">
-                        <div class="feature-card">
-                            <div class="card-body text-center">
-                                <div class="feature-card-icon">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <h5 class="card-title">Warranty Tracking</h5>
-                                <p class="card-text">Track your product warranties and get notified before expiry. <span class="text-warning"><strong>(Login required)</strong></span></p>
-                            </div>
-                        </div>
-                    </a>
-                <?php endif; ?>
-            </div>
-            <div class="col-md-4">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="reward_points.php" class="feature-card-link">
-                        <div class="feature-card">
-                            <div class="card-body text-center">
-                                <div class="feature-card-icon">
-                                    <i class="fas fa-gift"></i>
-                                </div>
-                                <h5 class="card-title">Reward Points</h5>
-                                <p class="card-text">Earn and redeem reward points with every purchase.</p>
-                            </div>
-                        </div>
-                    </a>
-                <?php else: ?>
-                    <a href="login.php" class="feature-card-link">
-                        <div class="feature-card">
-                            <div class="card-body text-center">
-                                <div class="feature-card-icon">
-                                    <i class="fas fa-gift"></i>
-                                </div>
-                                <h5 class="card-title">Reward Points</h5>
-                                <p class="card-text">Earn and redeem reward points with every purchase. <span class="text-warning"><strong>(Login required)</strong></span></p>
-                            </div>
-                        </div>
-                    </a>
-                <?php endif; ?>
-            </div>
+        <!-- Feature Cards removed (moved to navbar or feature menu) -->
 
-            <!-- Feature Menu Section -->
-            <div class="feature-menu-section mt-5">
-                <h2 class="text-center mb-5"><i class="fas fa-th-large"></i> Shop Features</h2>
-                <div class="row">
-                    <!-- Browse Products -->
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <a href="#products" class="feature-menu-link">
-                            <div class="feature-menu-card">
+        <!-- Feature Menu Section -->
+        <div class="feature-menu-section mt-5">
+            <h2 class="text-center mb-5"><i class="fas fa-th-large"></i> Shop Features</h2>
+            <div class="row">
+                <!-- Browse Products -->
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="#products" class="feature-menu-link">
+                        <div class="feature-menu-card">
+                            <div class="feature-menu-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <h6 class="feature-menu-title">Browse Products</h6>
+                            <p class="feature-menu-text">Explore our wide range of electrical products</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Shopping Cart -->
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <a href="cart.php" class="feature-menu-link">
+                        <?php else: ?>
+                            <a href="login.php" class="feature-menu-link">
+                            <?php endif; ?>
+                            <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
                                 <div class="feature-menu-icon">
-                                    <i class="fas fa-shopping-bag"></i>
+                                    <i class="fas fa-shopping-cart"></i>
                                 </div>
-                                <h6 class="feature-menu-title">Browse Products</h6>
-                                <p class="feature-menu-text">Explore our wide range of electrical products</p>
+                                <h6 class="feature-menu-title">Shopping Cart</h6>
+                                <p class="feature-menu-text">View and manage your shopping cart <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
                             </div>
-                        </a>
-                    </div>
+                            </a>
+                </div>
 
-                    <!-- Shopping Cart -->
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <?php if (isset($_SESSION['user_id'])): ?>
-                            <a href="cart.php" class="feature-menu-link">
-                            <?php else: ?>
-                                <a href="login.php" class="feature-menu-link">
-                                <?php endif; ?>
-                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
-                                    <div class="feature-menu-icon">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </div>
-                                    <h6 class="feature-menu-title">Shopping Cart</h6>
-                                    <p class="feature-menu-text">View and manage your shopping cart <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
-                                </div>
-                                </a>
-                    </div>
-
-                    <!-- My Orders -->
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <?php if (isset($_SESSION['user_id'])): ?>
-                            <a href="my_orders.php" class="feature-menu-link">
-                            <?php else: ?>
-                                <a href="login.php" class="feature-menu-link">
-                                <?php endif; ?>
-                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
-                                    <div class="feature-menu-icon">
-                                        <i class="fas fa-receipt"></i>
-                                    </div>
-                                    <h6 class="feature-menu-title">My Orders</h6>
-                                    <p class="feature-menu-text">Track and manage your orders <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
-                                </div>
-                                </a>
-                    </div>
-
-
-
-
-
-                    <!-- Service Requests -->
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <?php if (isset($_SESSION['user_id'])): ?>
-                            <a href="service_request.php" class="feature-menu-link">
-                            <?php else: ?>
-                                <a href="login.php" class="feature-menu-link">
-                                <?php endif; ?>
-                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
-                                    <div class="feature-menu-icon">
-                                        <i class="fas fa-tools"></i>
-                                    </div>
-                                    <h6 class="feature-menu-title">Service Requests</h6>
-                                    <p class="feature-menu-text">Submit maintenance requests <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
-                                </div>
-                                </a>
-                    </div>
-
-                    <!-- Energy Calculator -->
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <a href="energy_usage.php" class="feature-menu-link">
-                            <div class="feature-menu-card">
+                <!-- My Orders -->
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <a href="my_orders.php" class="feature-menu-link">
+                        <?php else: ?>
+                            <a href="login.php" class="feature-menu-link">
+                            <?php endif; ?>
+                            <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
                                 <div class="feature-menu-icon">
-                                    <i class="fas fa-bolt"></i>
+                                    <i class="fas fa-receipt"></i>
                                 </div>
-                                <h6 class="feature-menu-title">Energy Calculator</h6>
-                                <p class="feature-menu-text">Calculate energy usage and costs</p>
+                                <h6 class="feature-menu-title">My Orders</h6>
+                                <p class="feature-menu-text">Track and manage your orders <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
                             </div>
-                        </a>
-                    </div>
+                            </a>
+                </div>
 
-                    <!-- Contact Support -->
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <a href="contact.php" class="feature-menu-link">
-                            <div class="feature-menu-card">
+
+
+
+
+                <!-- Service Requests -->
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <a href="service_request.php" class="feature-menu-link">
+                        <?php else: ?>
+                            <a href="login.php" class="feature-menu-link">
+                            <?php endif; ?>
+                            <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
                                 <div class="feature-menu-icon">
-                                    <i class="fas fa-headset"></i>
+                                    <i class="fas fa-tools"></i>
                                 </div>
-                                <h6 class="feature-menu-title">Contact Support</h6>
-                                <p class="feature-menu-text">Get help from our support team</p>
+                                <h6 class="feature-menu-title">Service Requests</h6>
+                                <p class="feature-menu-text">Submit maintenance requests <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
                             </div>
-                        </a>
-                    </div>
+                            </a>
+                </div>
+
+                <!-- Energy Calculator -->
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="energy_usage.php" class="feature-menu-link">
+                        <div class="feature-menu-card">
+                            <div class="feature-menu-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h6 class="feature-menu-title">Energy Calculator</h6>
+                            <p class="feature-menu-text">Calculate energy usage and costs</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Contact Support -->
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="contact.php" class="feature-menu-link">
+                        <div class="feature-menu-card">
+                            <div class="feature-menu-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <h6 class="feature-menu-title">Contact Support</h6>
+                            <p class="feature-menu-text">Get help from our support team</p>
+                        </div>
+                    </a>
                 </div>
             </div>
-
-
-
-            <!-- Products Section -->
-            <?php if (!empty($products)): ?>
-                <div id="products" class="product-section">
-                    <h2><i class="fas fa-cube"></i> Available Products</h2>
-                    <div class="row">
-                        <?php foreach ($products as $product): ?>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="product-card">
-                                    <div class="product-card-body">
-                                        <?php
-                                        $images = [];
-                                        if (!empty($product['images'])) {
-                                            $images = json_decode($product['images'], true);
-                                        }
-                                        $img_src = !empty($images) ? htmlspecialchars($images[0]) : 'images/default-product.png';
-                                        ?>
-                                        <a href="product_details.php?product_id=<?= $product['product_id'] ?>">
-                                            <img src="<?= $img_src ?>" alt="<?= htmlspecialchars($product['name']) ?>" style="width:100%;height:200px;object-fit:cover;border-radius:8px;margin-bottom:10px;">
-                                        </a>
-                                        <h5><a href="product_details.php?product_id=<?= $product['product_id'] ?>" style="color:inherit;text-decoration:none;"><?= htmlspecialchars($product['name']) ?></a></h5>
-                                        <p class="text-muted"><?= htmlspecialchars(substr($product['description'], 0, 100)) ?>...</p>
-                                        <div class="price">$<?= number_format($product['price'], 2) ?></div>
-                                        <div class="warranty">
-                                            <i class="fas fa-clock"></i> Warranty: <?= htmlspecialchars($product['warranty_duration']) ?> months
-                                        </div>
-                                        <div class="available">
-                                            <i class="fas fa-check-circle"></i> Available: <?= htmlspecialchars($product['available_quantity']) ?> units
-                                        </div>
-                                        <div class="product-actions">
-                                            <?php if (isset($_SESSION['user_id'])): ?>
-                                                <form method="POST" action="cart.php" style="flex: 1;">
-                                                    <input type="hidden" name="prod_id" value="<?= $product['product_id'] ?>" />
-                                                    <input type="hidden" name="qty" value="1" />
-                                                    <button type="submit" class="btn-add-cart" style="width: 100%;">
-                                                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                                                    </button>
-                                                </form>
-                                                <form method="POST" action="checkout.php" style="flex: 1;">
-                                                    <input type="hidden" name="prod_id" value="<?= $product['product_id'] ?>" />
-                                                    <input type="hidden" name="qty" value="1" />
-                                                    <button type="submit" class="btn-checkout" style="width: 100%;">
-                                                        <i class="fas fa-money-check-alt"></i> Buy Now
-                                                    </button>
-                                                </form>
-                                            <?php else: ?>
-                                                <a href="login.php" class="btn-add-cart" style="text-align: center; display: flex; align-items: center; justify-content: center;">
-                                                    <i class="fas fa-shopping-cart"></i> Add to Cart
-                                                </a>
-                                                <a href="login.php" class="btn-checkout" style="text-align: center; display: flex; align-items: center; justify-content: center;">
-                                                    <i class="fas fa-money-check-alt"></i> Buy Now
-                                                </a>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            <?php else: ?>
-                <div class="no-products">
-                    <i class="fas fa-inbox"></i> No products available at the moment.
-                </div>
-            <?php endif; ?>
         </div>
 
 
 
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <!-- Products Section -->
+        <?php if (!empty($products)): ?>
+            <div id="products" class="product-section">
+                <h2><i class="fas fa-cube"></i> Available Products</h2>
+                <div class="row">
+                    <?php foreach ($products as $product): ?>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-card-body">
+                                    <?php
+                                    $images = [];
+                                    if (!empty($product['images'])) {
+                                        $images = json_decode($product['images'], true);
+                                    }
+                                    $img_src = !empty($images) ? htmlspecialchars($images[0]) : 'images/default-product.png';
+                                    ?>
+                                    <a href="product_details.php?product_id=<?= $product['product_id'] ?>">
+                                        <img src="<?= $img_src ?>" alt="<?= htmlspecialchars($product['name']) ?>" style="width:100%;height:200px;object-fit:cover;border-radius:8px;margin-bottom:10px;">
+                                    </a>
+                                    <h5><a href="product_details.php?product_id=<?= $product['product_id'] ?>" style="color:inherit;text-decoration:none;"><?= htmlspecialchars($product['name']) ?></a></h5>
+                                    <p class="text-muted"><?= htmlspecialchars(substr($product['description'], 0, 100)) ?>...</p>
+                                    <div class="price">৳ <?= number_format($product['price'], 2) ?></div>
+                                    <div class="warranty">
+                                        <i class="fas fa-clock"></i> Warranty: <?= htmlspecialchars($product['warranty_duration']) ?> months
+                                    </div>
+                                    <div class="available">
+                                        <i class="fas fa-check-circle"></i> Available: <?= htmlspecialchars($product['available_quantity']) ?> units
+                                    </div>
+                                    <div class="product-actions">
+                                        <?php if (isset($_SESSION['user_id'])): ?>
+                                            <form method="POST" action="cart.php" style="flex: 1;">
+                                                <input type="hidden" name="prod_id" value="<?= $product['product_id'] ?>" />
+                                                <input type="hidden" name="qty" value="1" />
+                                                <button type="submit" class="btn-add-cart" style="width: 100%;">
+                                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="checkout.php" style="flex: 1;">
+                                                <input type="hidden" name="prod_id" value="<?= $product['product_id'] ?>" />
+                                                <input type="hidden" name="qty" value="1" />
+                                                <button type="submit" class="btn-checkout" style="width: 100%;">
+                                                    <i class="fas fa-money-check-alt"></i> Buy Now
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <a href="login.php" class="btn-add-cart" style="text-align: center; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                                            </a>
+                                            <a href="login.php" class="btn-checkout" style="text-align: center; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-money-check-alt"></i> Buy Now
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="no-products">
+                <i class="fas fa-inbox"></i> No products available at the moment.
+            </div>
+        <?php endif; ?>
+    </div>
 
-        <script>
-            // Check for logout success message from URL parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('logout_success')) {
-                const popup = document.createElement('div');
-                popup.className = 'success-popup';
-                popup.innerHTML = '<i class="fas fa-check-circle"></i> Successfully logged out!';
-                document.body.appendChild(popup);
 
-                // Remove the popup after 2 seconds with animation
-                setTimeout(() => {
-                    popup.remove();
-                }, 2000);
 
-                // Clean up the URL parameter
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-            // Check for login success message from URL parameter
-            if (urlParams.has('login_success')) {
-                const popup = document.createElement('div');
-                popup.className = 'success-popup';
-                popup.innerHTML = '<i class="fas fa-check-circle"></i> Successfully logged in!';
-                document.body.appendChild(popup);
+    <script>
+        // Check for logout success message from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('logout_success')) {
+            const popup = document.createElement('div');
+            popup.className = 'success-popup';
+            popup.innerHTML = '<i class="fas fa-check-circle"></i> Successfully logged out!';
+            document.body.appendChild(popup);
 
-                // Remove the popup after 2 seconds with animation
-                setTimeout(() => {
-                    popup.remove();
-                }, 2000);
+            // Remove the popup after 2 seconds with animation
+            setTimeout(() => {
+                popup.remove();
+            }, 2000);
 
-                // Clean up the URL parameter
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        </script>
+            // Clean up the URL parameter
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // Check for login success message from URL parameter
+        if (urlParams.has('login_success')) {
+            const popup = document.createElement('div');
+            popup.className = 'success-popup';
+            popup.innerHTML = '<i class="fas fa-check-circle"></i> Successfully logged in!';
+            document.body.appendChild(popup);
+
+            // Remove the popup after 2 seconds with animation
+            setTimeout(() => {
+                popup.remove();
+            }, 2000);
+
+            // Clean up the URL parameter
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    </script>
 </body>
 
 </html>

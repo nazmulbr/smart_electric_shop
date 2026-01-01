@@ -325,7 +325,7 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
                     <?php foreach ($cart_items as $item): ?>
                         <tr>
                             <td><?= htmlspecialchars($item['name']) ?></td>
-                            <td><?= number_format($item['price'], 2) ?></td>
+                            <td>৳ <?= number_format($item['price'], 2) ?></td>
                             <td><?= $item['discount'] > 0 ? $item['discount'] . '%' : 'None' ?></td>
                             <td>
                                 <form method="POST" class="form-inline">
@@ -334,7 +334,7 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
                                     <input type="submit" name="update" value="Update" class="btn btn-sm btn-primary ml-1" />
                                 </form>
                             </td>
-                            <td><?= number_format($item['item_total'], 2) ?></td>
+                            <td>৳ <?= number_format($item['item_total'], 2) ?></td>
                             <td>
                                 <form method="POST">
                                     <input type="hidden" name="prod_id" value="<?= $item['product_id'] ?>" />
@@ -347,7 +347,7 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
                 <tfoot>
                     <tr class="table-info">
                         <th colspan="4">Grand Total</th>
-                        <th><?= number_format($total, 2) ?></th>
+                        <th>৳ <?= number_format($total, 2) ?></th>
                         <th></th>
                     </tr>
                 </tfoot>

@@ -32,9 +32,9 @@ if ($warranty) {
         <h4>My Warranty Status</h4>
         <?php if ($warranty): ?>
             <?php
-            // Fetch product(s) purchased on the warranty purchase date to show short details
+            // Fetch product(s) purchased on the warranty purchase date to show short details (no thumbnails)
             $products_for_warranty = [];
-            $pstmt = $conn->prepare("SELECT p.product_id, p.name, p.description, p.images FROM `Order` o
+            $pstmt = $conn->prepare("SELECT p.product_id, p.name, p.description FROM `Order` o
                 JOIN OrderItem oi ON oi.order_id = o.order_id
                 JOIN Product p ON p.product_id = oi.product_id
                 WHERE o.user_id = ? AND DATE(o.order_date) = ?");
@@ -57,21 +57,9 @@ if ($warranty) {
                         <th>Product(s)</th>
                         <td>
                             <?php foreach ($products_for_warranty as $pp): ?>
-                                <?php
-                                $thumb = 'images/default-product.png';
-                                if (!empty($pp['images'])) {
-                                    $imgs = json_decode($pp['images'], true);
-                                    if (!empty($imgs) && is_array($imgs)) $thumb = htmlspecialchars($imgs[0]);
-                                }
-                                ?>
-                                <div style="margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;">
-                                    <a href="product_details.php?product_id=<?= $pp['product_id'] ?>" style="display:inline-block;">
-                                        <img src="<?= $thumb ?>" alt="<?= htmlspecialchars($pp['name']) ?>" style="width:60px;height:45px;object-fit:cover;border-radius:4px;" onerror="this.src='images/default-product.png'">
-                                    </a>
-                                    <div>
-                                        <a href="product_details.php?product_id=<?= $pp['product_id'] ?>" style="font-weight:600;color:#333;text-decoration:none;"><?= htmlspecialchars($pp['name']) ?></a><br>
-                                        <small class="text-muted"><?= htmlspecialchars(substr($pp['description'], 0, 120)) ?><?= strlen($pp['description']) > 120 ? '...' : '' ?></small>
-                                    </div>
+                                <div style="margin-bottom:8px;">
+                                    <a href="product_details.php?product_id=<?= $pp['product_id'] ?>" style="font-weight:600;color:#333;text-decoration:none;"><?= htmlspecialchars($pp['name']) ?></a><br>
+                                    <small class="text-muted"><?= htmlspecialchars(substr($pp['description'], 0, 120)) ?><?= strlen($pp['description']) > 120 ? '...' : '' ?></small>
                                 </div>
                             <?php endforeach; ?>
                         </td>

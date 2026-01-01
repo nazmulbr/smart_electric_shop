@@ -17,6 +17,32 @@ if (session_status() === PHP_SESSION_NONE) session_start();
         .navbar .navbar-brand img {
             filter: none;
         }
+
+        /* Position nav items in the top-right of the navbar container on wide screens */
+        .navbar {
+            position: relative;
+        }
+
+        .navbar .navbar-nav {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Ensure brand remains on the left and doesn't get overlapped */
+        .navbar .navbar-brand {
+            margin-right: 0.5rem;
+        }
+
+        /* On small screens, revert to normal stacked behavior */
+        @media (max-width: 991px) {
+            .navbar .navbar-nav {
+                position: static;
+                transform: none;
+                margin-top: 0.5rem;
+            }
+        }
     </style>
     <div class="container">
         <a class="navbar-brand" href="index.php">
@@ -37,22 +63,10 @@ if (session_status() === PHP_SESSION_NONE) session_start();
                 <?php endif; ?>
 
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-user-circle" style="margin-right:6px;"></i> <?= htmlspecialchars($_SESSION['name'] ?? '') ?>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
-                            <a class="dropdown-item" href="user_dashboard.php">Dashboard</a>
-                            <a class="dropdown-item" href="cart.php">Cart</a>
-                            <a class="dropdown-item" href="my_orders.php">My Orders</a>
-                            <a class="dropdown-item" href="my_warranty.php">Warranty</a>
-                            <a class="dropdown-item" href="reward_points.php">Rewards</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="logout.php">Logout</a>
-                        </div>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
                 <?php else: ?>
                     <li class="nav-item"><a class="nav-link" href="login.php">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="register.php">Register</a></li>
                 <?php endif; ?>
             </ul>
         </div>
