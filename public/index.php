@@ -623,6 +623,7 @@ if (checkTableExists('Product')) {
 </head>
 
 <body>
+    <?php require_once 'includes/navbar.php'; ?>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
@@ -643,9 +644,6 @@ if (checkTableExists('Product')) {
                                 <p class="user-name"><i class="fas fa-user"></i> <?= htmlspecialchars($_SESSION['name'] ?? '') ?></p>
                                 <p class="user-email"><i class="fas fa-envelope"></i> <?= htmlspecialchars($_SESSION['email'] ?? '') ?></p>
                             </div>
-                            <a href="#user-info-section" class="my-account-menu-item" onclick="scrollToUserInfo()">
-                                <i class="fas fa-id-card"></i> My Information
-                            </a>
                             <a href="cart.php" class="my-account-menu-item">
                                 <i class="fas fa-shopping-cart"></i> Shopping Cart
                             </a>
@@ -753,7 +751,7 @@ if (checkTableExists('Product')) {
                 <div class="row">
                     <!-- Browse Products -->
                     <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <a href="view_products.php" class="feature-menu-link">
+                        <a href="#products" class="feature-menu-link">
                             <div class="feature-menu-card">
                                 <div class="feature-menu-icon">
                                     <i class="fas fa-shopping-bag"></i>
@@ -798,39 +796,9 @@ if (checkTableExists('Product')) {
                                 </a>
                     </div>
 
-                    <!-- Warranty Status -->
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <?php if (isset($_SESSION['user_id'])): ?>
-                            <a href="my_warranty.php" class="feature-menu-link">
-                            <?php else: ?>
-                                <a href="login.php" class="feature-menu-link">
-                                <?php endif; ?>
-                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
-                                    <div class="feature-menu-icon">
-                                        <i class="fas fa-shield-alt"></i>
-                                    </div>
-                                    <h6 class="feature-menu-title">Warranty Status</h6>
-                                    <p class="feature-menu-text">Check your product warranties <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
-                                </div>
-                                </a>
-                    </div>
 
-                    <!-- Reward Points -->
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <?php if (isset($_SESSION['user_id'])): ?>
-                            <a href="reward_points.php" class="feature-menu-link">
-                            <?php else: ?>
-                                <a href="login.php" class="feature-menu-link">
-                                <?php endif; ?>
-                                <div class="feature-menu-card <?php if (!isset($_SESSION['user_id'])) echo 'locked-card'; ?>">
-                                    <div class="feature-menu-icon">
-                                        <i class="fas fa-gift"></i>
-                                    </div>
-                                    <h6 class="feature-menu-title">Reward Points</h6>
-                                    <p class="feature-menu-text">Earn and redeem rewards <?php if (!isset($_SESSION['user_id'])) echo '<span class="lock-badge"><i class="fas fa-lock"></i> Login required</span>'; ?></p>
-                                </div>
-                                </a>
-                    </div>
+
+
 
                     <!-- Service Requests -->
                     <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
@@ -877,113 +845,28 @@ if (checkTableExists('Product')) {
                 </div>
             </div>
 
-            <!-- User Dashboard Section (Only for logged in users) -->
-            <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'user'): ?>
-                <div id="user-info-section" class="user-dashboard-section mt-5">
-                    <h2 class="text-center mb-4"><i class="fas fa-user-circle"></i> My Account</h2>
 
-                    <!-- User Information Card -->
-                    <div class="row mb-5">
-                        <div class="col-md-6 offset-md-3">
-                            <div class="user-info-card">
-                                <h5><i class="fas fa-user"></i> Account Information</h5>
-                                <div class="user-info-item">
-                                    <label>Name:</label>
-                                    <p><?= htmlspecialchars($_SESSION['name'] ?? '') ?></p>
-                                </div>
-                                <div class="user-info-item">
-                                    <label>Email:</label>
-                                    <p><?= htmlspecialchars($_SESSION['email'] ?? '') ?></p>
-                                </div>
-                                <hr>
-                                <a href="user_form.php" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-edit"></i> Edit Profile
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- User Dashboard Features -->
-                    <h3 class="text-center mb-4">Quick Actions</h3>
-                    <div class="row">
-                        <!-- Shopping Cart -->
-                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                            <a href="cart.php" class="dashboard-card-link">
-                                <div class="dashboard-card">
-                                    <div class="dashboard-icon">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </div>
-                                    <h6>Shopping Cart</h6>
-                                    <p>View and manage your shopping cart</p>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- My Orders -->
-                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                            <a href="my_orders.php" class="dashboard-card-link">
-                                <div class="dashboard-card">
-                                    <div class="dashboard-icon">
-                                        <i class="fas fa-receipt"></i>
-                                    </div>
-                                    <h6>My Orders</h6>
-                                    <p>Track and manage your orders</p>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Warranty Status -->
-                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                            <a href="my_warranty.php" class="dashboard-card-link">
-                                <div class="dashboard-card">
-                                    <div class="dashboard-icon">
-                                        <i class="fas fa-shield-alt"></i>
-                                    </div>
-                                    <h6>Warranty Status</h6>
-                                    <p>Check your product warranties</p>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Reward Points -->
-                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                            <a href="reward_points.php" class="dashboard-card-link">
-                                <div class="dashboard-card">
-                                    <div class="dashboard-icon">
-                                        <i class="fas fa-gift"></i>
-                                    </div>
-                                    <h6>Reward Points</h6>
-                                    <p>Earn and redeem rewards</p>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Service Requests -->
-                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                            <a href="service_request.php" class="dashboard-card-link">
-                                <div class="dashboard-card">
-                                    <div class="dashboard-icon">
-                                        <i class="fas fa-tools"></i>
-                                    </div>
-                                    <h6>Service Requests</h6>
-                                    <p>Submit maintenance requests</p>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
 
             <!-- Products Section -->
             <?php if (!empty($products)): ?>
-                <div class="product-section">
+                <div id="products" class="product-section">
                     <h2><i class="fas fa-cube"></i> Available Products</h2>
                     <div class="row">
                         <?php foreach ($products as $product): ?>
                             <div class="col-lg-4 col-md-6">
                                 <div class="product-card">
                                     <div class="product-card-body">
-                                        <h5><?= htmlspecialchars($product['name']) ?></h5>
+                                        <?php
+                                        $images = [];
+                                        if (!empty($product['images'])) {
+                                            $images = json_decode($product['images'], true);
+                                        }
+                                        $img_src = !empty($images) ? htmlspecialchars($images[0]) : 'images/default-product.png';
+                                        ?>
+                                        <a href="product_details.php?product_id=<?= $product['product_id'] ?>">
+                                            <img src="<?= $img_src ?>" alt="<?= htmlspecialchars($product['name']) ?>" style="width:100%;height:200px;object-fit:cover;border-radius:8px;margin-bottom:10px;">
+                                        </a>
+                                        <h5><a href="product_details.php?product_id=<?= $product['product_id'] ?>" style="color:inherit;text-decoration:none;"><?= htmlspecialchars($product['name']) ?></a></h5>
                                         <p class="text-muted"><?= htmlspecialchars(substr($product['description'], 0, 100)) ?>...</p>
                                         <div class="price">$<?= number_format($product['price'], 2) ?></div>
                                         <div class="warranty">
@@ -1030,12 +913,7 @@ if (checkTableExists('Product')) {
             <?php endif; ?>
         </div>
 
-        <!-- My Account Button (Only visible when logged in) -->
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <a href="user_dashboard.php" class="my-account-btn" title="My Account">
-                <i class="fas fa-user"></i>
-            </a>
-        <?php endif; ?>
+
 
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -1072,16 +950,6 @@ if (checkTableExists('Product')) {
 
                 // Clean up the URL parameter
                 window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
-            // Function to scroll to user info section
-            function scrollToUserInfo() {
-                const element = document.getElementById('user-info-section');
-                if (element) {
-                    element.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
             }
         </script>
 </body>

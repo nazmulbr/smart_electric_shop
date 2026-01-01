@@ -17,7 +17,7 @@ if ($conn->connect_error) {
     echo "</ol>";
 } else {
     echo "<p style='color:green;'>✅ Database connection successful!</p>";
-    
+
     // Test if tables exist
     echo "<h3>Checking Tables:</h3>";
     $tables = ['User', 'Admin', 'Product', 'Order', 'Warranty', 'RewardPoints', 'ServiceRequest', 'BulkPricing'];
@@ -31,7 +31,7 @@ if ($conn->connect_error) {
         }
     }
     echo "</ul>";
-    
+
     // Check User table structure
     echo "<h3>User Table Structure:</h3>";
     $result = $conn->query("DESCRIBE User");
@@ -48,7 +48,7 @@ if ($conn->connect_error) {
         }
         echo "</table>";
     }
-    
+
     // Check if any users exist
     echo "<h3>User Count:</h3>";
     $result = $conn->query("SELECT COUNT(*) as count FROM User");
@@ -56,7 +56,7 @@ if ($conn->connect_error) {
         $row = $result->fetch_assoc();
         echo "<p>Total users in database: " . $row['count'] . "</p>";
     }
-    
+
     // Check if any admins exist
     echo "<h3>Admin Count:</h3>";
     $result = $conn->query("SELECT COUNT(*) as count FROM Admin");
@@ -69,21 +69,18 @@ if ($conn->connect_error) {
             echo "<p style='color:#856404;'>You need to create an admin account to access admin features.</p>";
             echo "<p><strong>Quick Fix:</strong></p>";
             echo "<ol style='color:#856404;'>";
-            echo "<li>Click the button below to create an admin account</li>";
-            echo "<li>Or use the default admin (if schema was imported with initial data):</li>";
-            echo "<ul>";
-            echo "<li>Email: <code>admin@smartelectric.com</code></li>";
-            echo "<li>Password: <code>admin123</code></li>";
-            echo "</ul>";
+            echo "<li>Click the button below to create a default admin account with full access</li>";
+            echo "<li>Or create a custom admin account</li>";
             echo "</ol>";
-            echo "<a href='create_admin.php' class='btn btn-warning' style='margin-top:10px;'>🔐 Create Admin Account</a>";
+            echo "<a href='create_default_admin.php' class='btn btn-success' style='margin-top:10px;'>✅ Create Default Admin (admin@smartelectric.com)</a> ";
+            echo "<a href='create_admin.php' class='btn btn-warning' style='margin-top:10px;'>🔐 Create Custom Admin Account</a>";
             echo "</div>";
         } else {
             echo "<p style='color:green;'>✅ Admin accounts exist. You can login or create more.</p>";
             echo "<a href='create_admin.php' class='btn btn-info' style='margin-top:10px;'>Create Another Admin</a>";
         }
     }
-    
+
     // Check Main_Admin
     echo "<h3>Main Admin Count:</h3>";
     $result = $conn->query("SELECT COUNT(*) as count FROM Main_Admin");
@@ -98,8 +95,7 @@ if ($conn->connect_error) {
 
 echo "<br><div style='margin-top:20px;'>";
 echo "<a href='index.php' class='btn btn-secondary'>Back to Home</a> ";
-echo "<a href='create_admin.php' class='btn btn-primary'>Create Admin Account</a> ";
+echo "<a href='create_default_admin.php' class='btn btn-success'>Create Default Admin</a> ";
+echo "<a href='create_admin.php' class='btn btn-primary'>Create Custom Admin</a> ";
 echo "<a href='init_database.php' class='btn btn-info'>Database Setup</a>";
 echo "</div>";
-?>
-

@@ -361,9 +361,6 @@ if ($conn->connect_error) {
                     </form>
                     <hr>
                     <div class="text-center-custom">
-                        <small>Are you an admin and can't login? <a href="admin_login_fix.php"><strong>Click here for help</strong></a></small>
-                    </div>
-                    <div class="text-center-custom">
                         Don't have an account? <a href="register.php">Register here</a>
                     </div>
                     <div class="text-center-custom">

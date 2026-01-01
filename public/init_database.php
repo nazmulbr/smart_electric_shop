@@ -15,17 +15,17 @@ $tableCheck = checkRequiredTables();
 // Handle manual table creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
     $schemaFile = '../database_schema.sql';
-    
+
     if (file_exists($schemaFile)) {
         $sql = file_get_contents($schemaFile);
-        
+
         // Remove comments and split by semicolon
         $sql = preg_replace('/--.*$/m', '', $sql);
         $statements = array_filter(array_map('trim', explode(';', $sql)));
-        
+
         $created = 0;
         $errors = [];
-        
+
         foreach ($statements as $statement) {
             if (!empty($statement) && stripos($statement, 'CREATE') !== false) {
                 if ($conn->query($statement)) {
@@ -38,10 +38,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
                 }
             }
         }
-        
+
         if ($created > 0 || empty($errors)) {
             $message = "✅ Database tables created successfully! ($created tables)";
             $success = true;
+
+            // Now import initial data (default admin account)
+            $initialDataFile = '../database_initial_data.sql';
+            if (file_exists($initialDataFile)) {
+                $initialSql = file_get_contents($initialDataFile);
+                $initialSql = preg_replace('/--.*$/m', '', $initialSql);
+                $initialStatements = array_filter(array_map('trim', explode(';', $initialSql)));
+
+                $imported = 0;
+                $importErrors = [];
+
+                foreach ($initialStatements as $statement) {
+                    if (!empty($statement)) {
+                        if ($conn->query($statement)) {
+                            $imported++;
+                        } else {
+                            if ($conn->errno != 1062) { // Ignore duplicate key errors
+                                $importErrors[] = $conn->error;
+                            }
+                        }
+                    }
+                }
+
+                if ($imported > 0) {
+                    $message .= "<br>✅ Default admin account created! (Email: admin@smartelectric.com, Password: admin123)";
+                }
+            }
+
             // Refresh check
             $tableCheck = checkRequiredTables();
         } else {
@@ -54,15 +82,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Database Initialization - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        .table-status { padding: 10px; margin: 5px 0; border-radius: 5px; }
-        .table-exists { background: #d4edda; color: #155724; }
-        .table-missing { background: #f8d7da; color: #721c24; }
+        .table-status {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+
+        .table-exists {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .table-missing {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
+
 <body class="bg-light">
     <div class="container mt-5">
         <div class="card">
@@ -75,19 +117,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
                         <?= htmlspecialchars($message) ?>
                     </div>
                 <?php endif; ?>
-                
+
                 <h4>Database Status</h4>
                 <p><strong>Database:</strong> smart_electric_shop</p>
-                <p><strong>Connection:</strong> 
+                <p><strong>Connection:</strong>
                     <?php if ($conn->connect_error): ?>
                         <span class="text-danger">❌ Failed</span>
                     <?php else: ?>
                         <span class="text-success">✅ Connected</span>
                     <?php endif; ?>
                 </p>
-                
+
                 <hr>
-                
+
                 <h4>Required Tables Status</h4>
                 <?php if ($tableCheck['all_exist']): ?>
                     <div class="alert alert-success">
@@ -98,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
                         ⚠️ Some tables are missing. Please create them.
                     </div>
                 <?php endif; ?>
-                
+
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -122,25 +164,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
                             'BulkPricing' => 'Bulk pricing rules',
                             'EnergyUsage' => 'Energy usage data'
                         ];
-                        
+
                         foreach ($allTables as $table => $desc):
                             $exists = checkTableExists($table);
                         ?>
-                        <tr>
-                            <td><strong><?= $table ?></strong></td>
-                            <td>
-                                <?php if ($exists): ?>
-                                    <span class="badge badge-success">✅ Exists</span>
-                                <?php else: ?>
-                                    <span class="badge badge-danger">❌ Missing</span>
-                                <?php endif; ?>
-                            </td>
-                            <td><?= $desc ?></td>
-                        </tr>
+                            <tr>
+                                <td><strong><?= $table ?></strong></td>
+                                <td>
+                                    <?php if ($exists): ?>
+                                        <span class="badge badge-success">✅ Exists</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-danger">❌ Missing</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= $desc ?></td>
+                            </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-                
+
                 <?php if (!$tableCheck['all_exist']): ?>
                     <hr>
                     <h4>Create Missing Tables</h4>
@@ -148,15 +190,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
                         <strong>Option 1: Automatic Creation</strong><br>
                         Click the button below to automatically create all missing tables from the schema file.
                     </div>
-                    
+
                     <form method="POST" onsubmit="return confirm('This will create all missing tables. Continue?');">
                         <button type="submit" name="create_tables" class="btn btn-primary btn-lg">
                             🚀 Create Missing Tables
                         </button>
                     </form>
-                    
+
                     <hr>
-                    
+
                     <div class="alert alert-info">
                         <strong>Option 2: Manual Import</strong><br>
                         <ol>
@@ -167,7 +209,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
                             <li>Click <strong>Go</strong></li>
                         </ol>
                         <p><strong>Schema file location:</strong><br>
-                        <code><?= realpath('../database_schema.sql') ?: '../database_schema.sql' ?></code></p>
+                            <code><?= realpath('../database_schema.sql') ?: '../database_schema.sql' ?></code>
+                        </p>
                     </div>
                 <?php else: ?>
                     <?php
@@ -178,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
                     <div class="alert alert-success">
                         <h5>✅ Database is Ready!</h5>
                         <p>All required tables exist. You can now use the application.</p>
-                        
+
                         <?php if ($admin_count == 0): ?>
                             <div class="alert alert-warning mt-3">
                                 <strong>⚠️ No Admin Account Found</strong><br>
@@ -196,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
                             <p><strong>Admin Accounts:</strong> <?= $admin_count ?> found</p>
                             <a href="create_admin.php" class="btn btn-info">Create Another Admin</a>
                         <?php endif; ?>
-                        
+
                         <hr>
                         <a href="index.php" class="btn btn-success">Go to Homepage</a>
                         <a href="test_db.php" class="btn btn-info">Test Database</a>
@@ -207,5 +250,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_tables'])) {
         </div>
     </div>
 </body>
-</html>
 
+</html>

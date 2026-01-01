@@ -1,7 +1,8 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
-    header('Location: login.php'); exit;
+    header('Location: login.php');
+    exit;
 }
 require_once '../config/db.php';
 
@@ -11,7 +12,8 @@ $order_created = false;
 
 // Calculate cart total (same logic as cart.php)
 if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
-    header('Location: cart.php'); exit;
+    header('Location: cart.php');
+    exit;
 }
 
 $cart_items = [];
@@ -52,7 +54,7 @@ foreach ($_SESSION['cart'] as $prod_id => $qty) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     $payment_method = $_POST['payment_method'] ?? 'Cash';
     $use_rewards = isset($_POST['use_rewards']) ? true : false;
-    
+
     // Get reward points
     $points_used = 0;
     $points_discount = 0;
@@ -68,48 +70,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         }
         $stmt->close();
     }
-    
+
     $final_total = $total - $points_discount;
     $discount_amount = $total - $final_total;
-    
+
     // Create order
     $stmt = $conn->prepare('INSERT INTO `Order` (user_id, order_date, payment_status, total_amount, discount) VALUES (?, NOW(), ?, ?, ?)');
     $payment_status = 'Pending';
     $stmt->bind_param('isdd', $user_id, $payment_status, $final_total, $discount_amount);
     $stmt->execute();
     $order_id = $conn->insert_id;
-    
+
     // Create order items and update stock
     foreach ($cart_items as $item) {
         $stmt = $conn->prepare('INSERT INTO OrderItem (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)');
         $stmt->bind_param('iiid', $order_id, $item['product_id'], $item['quantity'], $item['discounted_price']);
         $stmt->execute();
-        
+
         // Update product quantity
         $stmt2 = $conn->prepare('UPDATE Product SET available_quantity = available_quantity - ? WHERE product_id = ?');
         $stmt2->bind_param('ii', $item['quantity'], $item['product_id']);
         $stmt2->execute();
-        
+
         // Create warranty if product has warranty
         if ($item['warranty_duration'] > 0) {
             $stmt3 = $conn->prepare('INSERT INTO Warranty (warranty_duration, purchase_date) VALUES (?, CURDATE())');
             $stmt3->bind_param('i', $item['warranty_duration']);
             $stmt3->execute();
             $warranty_id = $conn->insert_id;
-            
+
             // Link warranty to user
             $stmt4 = $conn->prepare('UPDATE User SET warranty_id = ? WHERE user_id = ?');
             $stmt4->bind_param('ii', $warranty_id, $user_id);
             $stmt4->execute();
         }
     }
-    
+
     // Update reward points (deduct used, add earned)
     $points_earned = floor($final_total / 100); // 1 point per 100 BDT
     $stmt = $conn->prepare('INSERT INTO RewardPoints (user_id, points) VALUES (?, ?) ON DUPLICATE KEY UPDATE points = points + ? - ?');
     $stmt->bind_param('iiii', $user_id, $points_earned, $points_earned, $points_used);
     $stmt->execute();
-    
+
     // Link order to admin (for management)
     $admin_result = $conn->query('SELECT admin_id FROM Admin LIMIT 1');
     if ($admin_row = $admin_result->fetch_assoc()) {
@@ -118,28 +120,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $stmt->bind_param('ii', $order_id, $admin_id);
         $stmt->execute();
     }
-    
+
     // Clear cart
     $_SESSION['cart'] = [];
-    
+
     $message = "Order #$order_id placed successfully! Total: " . number_format($final_total, 2) . " BDT";
     $order_created = true;
 }
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Checkout - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
+    <?php require_once 'includes/navbar.php'; ?>
     <div class="container mt-4">
         <h4>Checkout</h4>
         <?php if ($message): ?>
-            <div class="alert alert-<?=$order_created?'success':'info'?>"><?=$message?></div>
+            <div class="alert alert-<?= $order_created ? 'success' : 'info' ?>"><?= $message ?></div>
             <?php if ($order_created): ?>
                 <a href="my_orders.php" class="btn btn-primary">View My Orders</a>
-                <a href="view_products.php" class="btn btn-secondary">Continue Shopping</a>
+                <a href="index.php" class="btn btn-secondary">Continue Shopping</a>
             <?php endif; ?>
         <?php else: ?>
             <div class="row">
@@ -147,26 +152,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                     <h5>Order Summary</h5>
                     <table class="table table-bordered bg-white">
                         <thead class="thead-dark">
-                            <tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($cart_items as $item): ?>
-                            <tr>
-                                <td><?=htmlspecialchars($item['name'])?></td>
-                                <td><?=$item['quantity']?></td>
-                                <td><?=number_format($item['discounted_price'], 2)?></td>
-                                <td><?=number_format($item['item_total'], 2)?></td>
-                            </tr>
+                                <tr>
+                                    <td><?= htmlspecialchars($item['name']) ?></td>
+                                    <td><?= $item['quantity'] ?></td>
+                                    <td><?= number_format($item['discounted_price'], 2) ?></td>
+                                    <td><?= number_format($item['item_total'], 2) ?></td>
+                                </tr>
                             <?php endforeach; ?>
                         </tbody>
                         <tfoot>
-                            <tr><th colspan="3">Subtotal</th><th><?=number_format($total, 2)?></th></tr>
+                            <tr>
+                                <th colspan="3">Subtotal</th>
+                                <th><?= number_format($total, 2) ?></th>
+                            </tr>
                         </tfoot>
                     </table>
                 </div>
                 <div class="col-md-4">
                     <div class="card">
-                        <div class="card-header"><h5>Payment</h5></div>
+                        <div class="card-header">
+                            <h5>Payment</h5>
+                        </div>
                         <div class="card-body">
                             <form method="POST">
                                 <div class="form-group">
@@ -185,13 +200,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                                 $has_points = $stmt->fetch();
                                 $stmt->close();
                                 if ($has_points && $user_points > 0): ?>
-                                <div class="form-check">
-                                    <input type="checkbox" name="use_rewards" class="form-check-input" id="use_rewards">
-                                    <label class="form-check-label" for="use_rewards">Use Reward Points (<?=$user_points?> available)</label>
-                                </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" name="use_rewards" class="form-check-input" id="use_rewards">
+                                        <label class="form-check-label" for="use_rewards">Use Reward Points (<?= $user_points ?> available)</label>
+                                    </div>
                                 <?php endif; ?>
                                 <div class="mt-3">
-                                    <strong>Total: <?=number_format($total, 2)?> BDT</strong>
+                                    <strong>Total: <?= number_format($total, 2) ?> BDT</strong>
                                 </div>
                                 <button type="submit" name="place_order" class="btn btn-success btn-block mt-3">Place Order</button>
                             </form>
@@ -203,5 +218,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         <?php endif; ?>
     </div>
 </body>
-</html>
 
+</html>

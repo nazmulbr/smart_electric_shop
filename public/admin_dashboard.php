@@ -10,13 +10,16 @@ $email = $_SESSION['email'];
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Admin Dashboard - Smart Electric Shop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body class="bg-dark text-light">
+    <?php require_once 'includes/navbar.php'; ?>
     <div class="container mt-4">
-        <h3>Welcome, Admin <?=$name?></h3>
+        <h3>Welcome, Admin <?= $name ?></h3>
         <div class="mt-4">
             <a href="manage_products.php" class="btn btn-info">Manage Products</a>
             <a href="manage_users.php" class="btn btn-secondary">Manage Users</a>
@@ -29,5 +32,5 @@ $email = $_SESSION['email'];
         </div>
     </div>
 </body>
-</html>
 
+</html>

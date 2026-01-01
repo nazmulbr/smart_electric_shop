@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
-    header('Location: login.php?redirect=warranty');
+    header('Location: login.php');
     exit;
 }
 require_once '../config/db.php';
@@ -27,10 +27,56 @@ if ($warranty) {
 </head>
 
 <body class="bg-light">
+    <?php require_once 'includes/navbar.php'; ?>
     <div class="container mt-4">
         <h4>My Warranty Status</h4>
         <?php if ($warranty): ?>
+            <?php
+            // Fetch product(s) purchased on the warranty purchase date to show short details
+            $products_for_warranty = [];
+            $pstmt = $conn->prepare("SELECT p.product_id, p.name, p.description, p.images FROM `Order` o
+                JOIN OrderItem oi ON oi.order_id = o.order_id
+                JOIN Product p ON p.product_id = oi.product_id
+                WHERE o.user_id = ? AND DATE(o.order_date) = ?");
+            if ($pstmt) {
+                $pdate = $warranty['purchase_date'];
+                $pstmt->bind_param('is', $user_id, $pdate);
+                $pstmt->execute();
+                $pres = $pstmt->get_result();
+                if ($pres) {
+                    while ($prow = $pres->fetch_assoc()) {
+                        $products_for_warranty[] = $prow;
+                    }
+                }
+                $pstmt->close();
+            }
+            ?>
             <table class="table table-bordered bg-white col-md-6">
+                <?php if (!empty($products_for_warranty)): ?>
+                    <tr>
+                        <th>Product(s)</th>
+                        <td>
+                            <?php foreach ($products_for_warranty as $pp): ?>
+                                <?php
+                                $thumb = 'images/default-product.png';
+                                if (!empty($pp['images'])) {
+                                    $imgs = json_decode($pp['images'], true);
+                                    if (!empty($imgs) && is_array($imgs)) $thumb = htmlspecialchars($imgs[0]);
+                                }
+                                ?>
+                                <div style="margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;">
+                                    <a href="product_details.php?product_id=<?= $pp['product_id'] ?>" style="display:inline-block;">
+                                        <img src="<?= $thumb ?>" alt="<?= htmlspecialchars($pp['name']) ?>" style="width:60px;height:45px;object-fit:cover;border-radius:4px;" onerror="this.src='images/default-product.png'">
+                                    </a>
+                                    <div>
+                                        <a href="product_details.php?product_id=<?= $pp['product_id'] ?>" style="font-weight:600;color:#333;text-decoration:none;"><?= htmlspecialchars($pp['name']) ?></a><br>
+                                        <small class="text-muted"><?= htmlspecialchars(substr($pp['description'], 0, 120)) ?><?= strlen($pp['description']) > 120 ? '...' : '' ?></small>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </td>
+                    </tr>
+                <?php endif; ?>
                 <tr>
                     <th>Duration (months)</th>
                     <td><?= htmlspecialchars($warranty['warranty_duration']) ?></td>

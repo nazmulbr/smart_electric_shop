@@ -10,7 +10,9 @@ $user_id = $_SESSION['user_id'];
 $stmt = $conn->prepare('SELECT * FROM `Order` WHERE user_id = ? ORDER BY order_date DESC');
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
-$orders = $stmt->get_result() ? $stmt->get_result()->fetch_all(MYSQLI_ASSOC) : [];
+$res = $stmt->get_result();
+$orders = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+$stmt->close();
 ?>
 <!DOCTYPE html>
 <html>
@@ -21,10 +23,11 @@ $orders = $stmt->get_result() ? $stmt->get_result()->fetch_all(MYSQLI_ASSOC) : [
 </head>
 
 <body class="bg-light">
+    <?php require_once 'includes/navbar.php'; ?>
     <div class="container mt-4">
         <h4>My Order History</h4>
         <?php if (empty($orders)): ?>
-            <div class="alert alert-info">You have no orders yet. <a href="view_products.php">Start Shopping</a></div>
+            <div class="alert alert-info">You have no orders yet. <a href="index.php">Start Shopping</a></div>
         <?php else: ?>
             <table class="table table-bordered bg-white">
                 <thead class="thead-dark">
