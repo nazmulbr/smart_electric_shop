@@ -14,15 +14,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = $_POST['subject'] ?? '';
     $message_text = $_POST['message'] ?? '';
     if ($name && $email && $subject && $message_text) {
-        // Store contact info (you can create a Contact table or use ServiceRequest)
-        // For now, we'll create a service request
+        // Ensure ContactMessages table exists
+        $create = "CREATE TABLE IF NOT EXISTS ContactMessages (
+            message_id INT PRIMARY KEY AUTO_INCREMENT,
+            user_id INT NULL,
+            name VARCHAR(100),
+            email VARCHAR(150),
+            subject VARCHAR(255),
+            message TEXT,
+            status VARCHAR(30) DEFAULT 'Open',
+            response_text TEXT NULL,
+            responded_by INT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )";
+        $conn->query($create);
+
         $user_id = $_SESSION['user_id'];
-        $stmt = $conn->prepare('INSERT INTO ServiceRequest (user_id, issue, status) VALUES (?, ?, ?)');
-        $issue = "Contact: $subject - $message_text";
+        $ins = $conn->prepare('INSERT INTO ContactMessages (user_id, name, email, subject, message, status) VALUES (?, ?, ?, ?, ?, ?)');
         $status = 'Open';
-        $stmt->bind_param('iss', $user_id, $issue, $status);
-        $stmt->execute();
-        $message = 'Your message has been sent! We will contact you soon.';
+        $ins->bind_param('isssss', $user_id, $name, $email, $subject, $message_text, $status);
+        if ($ins->execute()) {
+            $message = 'Your message has been sent! We will contact you soon.';
+        } else {
+            $message = 'Failed to send message. Please try again later.';
+        }
     } else {
         $message = 'Please fill all fields.';
     }

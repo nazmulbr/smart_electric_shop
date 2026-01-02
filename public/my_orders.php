@@ -27,6 +27,10 @@ $stmt->close();
     <?php require_once 'includes/navbar.php'; ?>
     <div class="container mt-4">
         <h4>My Order History</h4>
+        <?php if (!empty($_SESSION['flash_message'])): ?>
+            <div class="alert alert-info"><?php echo htmlentities($_SESSION['flash_message']);
+                                            unset($_SESSION['flash_message']); ?></div>
+        <?php endif; ?>
         <?php if (empty($orders)): ?>
             <div class="alert alert-info">You have no orders yet. <a href="index.php">Start Shopping</a></div>
         <?php else: ?>

@@ -30,7 +30,7 @@ if (isset($_GET['delete'])) {
 
 // Get warranties
 $warranties = [];
-$result = $conn->query('SELECT w.*, u.name as user_name FROM Warranty w LEFT JOIN User u ON w.warranty_id = u.warranty_id ORDER BY w.warranty_id DESC');
+$result = $conn->query('SELECT w.*, u.name as user_name FROM Warranty w LEFT JOIN User u ON u.warranty_id = w.warranty_id ORDER BY w.warranty_id DESC');
 if ($result) {
     $warranties = $result->fetch_all(MYSQLI_ASSOC);
 } else {
@@ -68,10 +68,10 @@ if ($result) {
             <tbody>
                 <?php foreach ($warranties as $w): ?>
                     <tr>
-                        <td><?= htmlspecialchars($w['warranty_id']) ?></td>
-                        <td><?= htmlspecialchars($w['warranty_duration']) ?></td>
-                        <td><?= htmlspecialchars($w['purchase_date']) ?></td>
-                        <td><?= htmlspecialchars($w['user_name']) ?></td>
+                        <td><?= htmlspecialchars($w['warranty_id'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($w['warranty_duration'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($w['purchase_date'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($w['user_name'] ?? '') ?></td>
                         <td>
                             <a href="warranty_form.php?edit=<?= $w['warranty_id'] ?>" class="btn btn-primary btn-sm">Edit</a>
                             <a href="manage_warranty.php?delete=<?= $w['warranty_id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this warranty?')">Delete</a>

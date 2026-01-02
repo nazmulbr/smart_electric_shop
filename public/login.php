@@ -50,34 +50,7 @@ if ($conn->connect_error) {
                 $stmt->close();
             }
 
-            // If no admin matched by email, but there is exactly one admin in DB,
-            // allow authenticating against that sole admin record (single-admin mode).
-            if (!$user_found) {
-                $countRes = $conn->query("SELECT COUNT(*) as cnt FROM Admin");
-                $adminCount = $countRes ? intval($countRes->fetch_assoc()['cnt']) : 0;
-                if ($adminCount === 1) {
-                    $oneStmt = $conn->prepare("SELECT admin_id AS id, email, password, name FROM Admin LIMIT 1");
-                    if ($oneStmt) {
-                        $oneStmt->execute();
-                        $oneRes = $oneStmt->get_result();
-                        if ($oneRes && $oneRow = $oneRes->fetch_assoc()) {
-                            if (password_verify($password, $oneRow['password']) || $password === $oneRow['password']) {
-                                // If email mismatched, inform the user which admin email to use
-                                $user_data = [
-                                    'id' => $oneRow['id'],
-                                    'role' => 'admin',
-                                    'email' => $oneRow['email'],
-                                    'name' => $oneRow['name']
-                                ];
-                                $user_found = true;
-                            } else {
-                                $login_err = 'Invalid password.';
-                            }
-                        }
-                        $oneStmt->close();
-                    }
-                }
-            }
+            // Admin login requires both matching email and password. No fallback by password alone.
 
             // Try Staff login if admin not found
             if (!$user_found) {

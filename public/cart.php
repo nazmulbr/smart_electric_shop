@@ -337,6 +337,15 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
                             </td>
                             <td>৳ <?= number_format($item['item_total'], 2) ?></td>
                             <td>
+                                <?php $orig = $item['price'] * $item['quantity'];
+                                $saved = $orig - $item['item_total']; ?>
+                                <?php if ($saved > 0): ?>
+                                    <span class="text-success">Saved ৳ <?= number_format($saved, 2) ?></span>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
+                            <td>
                                 <form method="POST">
                                     <input type="hidden" name="prod_id" value="<?= $item['product_id'] ?>" />
                                     <input type="submit" name="remove" value="Remove" class="btn btn-sm btn-danger" onclick="return confirm('Remove this item?')" />

@@ -61,6 +61,7 @@ CREATE TABLE Product (
     price DECIMAL(10,2),
     warranty_duration INT,
     available_quantity INT,
+    reward_points INT DEFAULT 0,
     admin_id INT,
     warranty_id INT,
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)

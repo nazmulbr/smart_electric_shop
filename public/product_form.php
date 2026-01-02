@@ -10,6 +10,12 @@ if (!checkTableExists('Product')) {
     die(showTableError('Product', 'Product Management'));
 }
 
+// Ensure Product table has images column
+$check_column = $conn->query("SHOW COLUMNS FROM Product LIKE 'images'");
+if (!$check_column || $check_column->num_rows == 0) {
+    $conn->query("ALTER TABLE Product ADD COLUMN images TEXT NULL AFTER reward_points");
+}
+
 $isEdit = isset($_GET['edit']);
 $message = '';
 $p = [
@@ -18,7 +24,8 @@ $p = [
     'description' => '',
     'price' => '',
     'warranty_duration' => '',
-    'available_quantity' => ''
+    'available_quantity' => '',
+    'reward_points' => ''
 ];
 
 // Edit - fetch product
@@ -28,7 +35,13 @@ if ($isEdit) {
     $stmt->bind_param('i', $id);
     $stmt->execute();
     $result = $stmt->get_result();
-    if ($result && $row = $result->fetch_assoc()) $p = $row;
+    if ($result && $row = $result->fetch_assoc()) {
+        $p = $row;
+        // Ensure reward_points defaults to 0 if null
+        if (!isset($p['reward_points']) || $p['reward_points'] === null) {
+            $p['reward_points'] = 0;
+        }
+    }
 }
 // Handle POST (add or update)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -38,14 +51,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = floatval($_POST['price'] ?? 0);
     $warranty = intval($_POST['warranty_duration'] ?? 0);
     $qty = intval($_POST['available_quantity'] ?? 0);
+    $reward_points = intval($_POST['reward_points'] ?? 0);
     $admin_id = $_SESSION['user_id'];
 
     if ($name && $price > 0 && $qty >= 0) {
         if ($id) {
             // Update existing product
-            $stmt = $conn->prepare('UPDATE Product SET name=?, description=?, price=?, warranty_duration=?, available_quantity=? WHERE product_id=?');
+            $stmt = $conn->prepare('UPDATE Product SET name=?, description=?, price=?, warranty_duration=?, available_quantity=?, reward_points=? WHERE product_id=?');
             if ($stmt) {
-                $stmt->bind_param('ssdiii', $name, $desc, $price, $warranty, $qty, $id);
+                $stmt->bind_param('ssdiiii', $name, $desc, $price, $warranty, $qty, $reward_points, $id);
                 if ($stmt->execute()) {
                     // Handle uploaded images (if any)
                     $uploaded_paths = [];
@@ -113,9 +127,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             // Insert new product
-            $stmt = $conn->prepare('INSERT INTO Product (name, description, price, warranty_duration, available_quantity, admin_id) VALUES (?, ?, ?, ?, ?, ?)');
+            $stmt = $conn->prepare('INSERT INTO Product (name, description, price, warranty_duration, available_quantity, reward_points, admin_id) VALUES (?, ?, ?, ?, ?, ?, ?)');
             if ($stmt) {
-                $stmt->bind_param('ssdiii', $name, $desc, $price, $warranty, $qty, $admin_id);
+                $stmt->bind_param('ssdiiii', $name, $desc, $price, $warranty, $qty, $reward_points, $admin_id);
                 if ($stmt->execute()) {
                     $new_id = $stmt->insert_id;
 
@@ -224,6 +238,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-group">
                         <label>Available Quantity</label>
                         <input type="number" name="available_quantity" value="<?= htmlspecialchars($p['available_quantity']) ?>" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Reward Points</label>
+                        <input type="number" name="reward_points" value="<?= htmlspecialchars($p['reward_points'] ?? 0) ?>" class="form-control" min="0" />
+                        <small class="form-text text-muted">Points customers will earn when purchasing this product. Set to 0 if no reward points should be awarded for this product.</small>
                     </div>
                     <div class="form-group">
                         <label>Product Images (multiple allowed)</label>

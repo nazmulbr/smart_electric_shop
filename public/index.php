@@ -26,6 +26,11 @@ if (isset($_SESSION['user_id'])) {
 // Fetch all products to display
 $products = [];
 if (checkTableExists('Product')) {
+    // Ensure Product table has images column
+    $check_column = $conn->query("SHOW COLUMNS FROM Product LIKE 'images'");
+    if (!$check_column || $check_column->num_rows == 0) {
+        $conn->query("ALTER TABLE Product ADD COLUMN images TEXT NULL AFTER reward_points");
+    }
     $result = $conn->query('SELECT * FROM Product');
     $products = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 }
