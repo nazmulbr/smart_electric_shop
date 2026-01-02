@@ -1,6 +1,6 @@
 <?php
-// Require admin-only access
-$require_role = 'admin';
+// Require admin or staff access
+$require_role = 'admin_staff';
 require_once 'includes/admin_auth.php';
 require_once '../config/db.php';
 require_once '../config/error_handler.php';

@@ -18,7 +18,6 @@ CREATE TABLE Admin (
 
 CREATE TABLE Staff (
     staff_id INT PRIMARY KEY AUTO_INCREMENT,
-    admin_id INT,
     name VARCHAR(50),
     email VARCHAR(100),
     password VARCHAR(255),

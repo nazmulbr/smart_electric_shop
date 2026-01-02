@@ -60,7 +60,8 @@ if ($conn->connect_error) {
                     $stmt->execute();
                     $result = $stmt->get_result();
                     if ($result && $row = $result->fetch_assoc()) {
-                        if (password_verify($password, $row['password'])) {
+                        // Accept both hashed (recommended) and legacy plain-text passwords
+                        if (password_verify($password, $row['password']) || $password === $row['password']) {
                             $user_data = [
                                 'id' => $row['id'],
                                 'role' => 'staff',
