@@ -22,6 +22,18 @@ $create = "CREATE TABLE IF NOT EXISTS ContactMessages (
 )";
 $conn->query($create);
 
+// Ensure Notifications table exists (used to notify users when staff/admin responds)
+$createNot = "CREATE TABLE IF NOT EXISTS Notifications (
+    notifications_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    message TEXT,
+    warranty_id INT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_read TINYINT DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES User(user_id)
+);";
+$conn->query($createNot);
+
 // Handle response/update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
@@ -29,10 +41,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($action === 'respond' && $mid) {
         $response = $_POST['response_text'] ?? '';
         $admin_id = $_SESSION['user_id'];
+
+        // fetch user_id for this message (if any)
+        $q = $conn->prepare('SELECT user_id, subject FROM ContactMessages WHERE message_id = ?');
+        $user_id = null;
+        $subject = '';
+        if ($q) {
+            $q->bind_param('i', $mid);
+            $q->execute();
+            $q->bind_result($f_user_id, $f_subject);
+            if ($q->fetch()) {
+                $user_id = $f_user_id;
+                $subject = $f_subject;
+            }
+            $q->close();
+        }
+
         $up = $conn->prepare('UPDATE ContactMessages SET status = ?, response_text = ?, responded_by = ? WHERE message_id = ?');
         $status = 'Responded';
         $up->bind_param('ssii', $status, $response, $admin_id, $mid);
         $up->execute();
+
+        // If the message was from a logged-in user, create a notification for them
+        if (!empty($user_id)) {
+            $notif_msg = "Support has responded to your message" . (!empty($subject) ? (": $subject") : '') . ".\n\n" . substr($response, 0, 1000);
+            $ins = $conn->prepare('INSERT INTO Notifications (user_id, message) VALUES (?, ?)');
+            if ($ins) {
+                $ins->bind_param('is', $user_id, $notif_msg);
+                $ins->execute();
+                $ins->close();
+            }
+        }
     } elseif ($action === 'close' && $mid) {
         $up = $conn->prepare('UPDATE ContactMessages SET status = ? WHERE message_id = ?');
         $st = 'Closed';
@@ -41,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
-$stmt = $conn->prepare('SELECT cm.*, u.name AS user_name FROM ContactMessages cm LEFT JOIN User u ON cm.user_id = u.user_id ORDER BY created_at DESC');
+$stmt = $conn->prepare("SELECT cm.*, u.name AS user_name FROM ContactMessages cm LEFT JOIN User u ON cm.user_id = u.user_id WHERE cm.status NOT IN ('Responded','Closed') ORDER BY created_at DESC");
 $stmt->execute();
 $res = $stmt->get_result();
 $messages = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];

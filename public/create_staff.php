@@ -28,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $chk->close();
             } else {
                 $chk->close();
-                $hash = password_hash($password, PASSWORD_DEFAULT);
+                // Store staff password as provided (no hashing) per admin request
                 $ins = $conn->prepare('INSERT INTO Staff (name, email, password, phone_number) VALUES (?, ?, ?, ?)');
                 if ($ins) {
-                    $ins->bind_param('ssss', $name, $email, $hash, $phone);
+                    $ins->bind_param('ssss', $name, $email, $password, $phone);
                     if ($ins->execute()) {
                         $success = true;
                         $message = 'Staff account created successfully.';
