@@ -133,6 +133,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->execute()) {
                     $new_id = $stmt->insert_id;
 
+                    // Create warranty record for this product and link it
+                    if (!empty($warranty)) {
+                        $wstmt = $conn->prepare('INSERT INTO Warranty (warranty_duration, purchase_date) VALUES (?, NULL)');
+                        if ($wstmt) {
+                            $wstmt->bind_param('i', $warranty);
+                            $wstmt->execute();
+                            $warranty_id_for_product = $conn->insert_id;
+                            $wstmt->close();
+                            // Update product with warranty_id
+                            $ul = $conn->prepare('UPDATE Product SET warranty_id = ? WHERE product_id = ?');
+                            if ($ul) {
+                                $ul->bind_param('ii', $warranty_id_for_product, $new_id);
+                                $ul->execute();
+                                $ul->close();
+                            }
+                        }
+                    }
+
                     // Handle uploaded images for new product
                     $uploaded_paths = [];
                     if (!empty($_FILES['product_images']) && is_array($_FILES['product_images']['name'])) {

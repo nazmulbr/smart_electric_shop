@@ -9,6 +9,7 @@ $email = $_SESSION['email'];
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Admin Dashboard - Smart Electric Shop</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,21 +21,25 @@ $email = $_SESSION['email'];
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         .dashboard-section {
-            background: rgba(255,255,255,0.98);
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.11);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.11);
             padding: 40px 30px;
             margin-top: 50px;
         }
+
         .dashboard-header {
             text-align: center;
             margin-bottom: 30px;
         }
+
         .dashboard-header h2 {
             color: #007bff;
             font-weight: 700;
         }
+
         .admin-info-card {
             background: linear-gradient(125deg, #667eea, #764ba2);
             color: #fff;
@@ -44,25 +49,29 @@ $email = $_SESSION['email'];
             box-shadow: 0 4px 16px rgba(102, 126, 234, 0.11);
             text-align: center;
         }
+
         .admin-info-card .admin-name {
             font-size: 1.25rem;
             font-weight: 600;
         }
+
         .admin-info-card .admin-email {
             font-size: 0.98rem;
             opacity: 0.92;
         }
+
         .dashboard-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 24px;
             justify-content: center;
         }
+
         .dashboard-card {
             flex: 0 1 260px;
             background: #f9f9fb;
             border-radius: 14px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
             text-align: center;
             padding: 30px 10px 22px;
             transition: transform 0.18s, box-shadow 0.18s;
@@ -74,44 +83,63 @@ $email = $_SESSION['email'];
             align-items: center;
             justify-content: center;
         }
+
         .dashboard-card:hover {
             transform: translateY(-6px) scale(1.03);
-            box-shadow: 0 4px 24px rgba(102,126,234,0.16);
+            box-shadow: 0 4px 24px rgba(102, 126, 234, 0.16);
             color: #0056b3;
         }
+
         .dashboard-icon {
             font-size: 44px;
             color: #007bff;
             margin-bottom: 15px;
         }
+
         .dashboard-card-title {
             font-size: 1.14rem;
             font-weight: 600;
         }
+
         .dashboard-card-desc {
             color: #7c7c7c;
             font-size: 0.99rem;
             margin-bottom: 6px;
         }
+
         .logout-link {
             margin-top: 26px;
             font-size: 1rem;
         }
+
         .logout-link a {
             color: #dc3545;
             font-weight: 600;
             text-decoration: none;
         }
-        .logout-link a:hover { color: #b31b2a; }
-        @media (max-width: 900px) {
-            .dashboard-grid { gap: 15px; }
+
+        .logout-link a:hover {
+            color: #b31b2a;
         }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                gap: 15px;
+            }
+        }
+
         @media (max-width: 600px) {
-            .dashboard-section { padding: 22px 2vw; }
-            .dashboard-header { margin-bottom: 20px; }
+            .dashboard-section {
+                padding: 22px 2vw;
+            }
+
+            .dashboard-header {
+                margin-bottom: 20px;
+            }
         }
     </style>
 </head>
+
 <body>
     <?php require_once 'includes/navbar.php'; ?>
     <div class="container dashboard-section">
@@ -163,10 +191,16 @@ $email = $_SESSION['email'];
                 <div class="dashboard-card-title">Contact Messages</div>
                 <div class="dashboard-card-desc">View and respond to user messages</div>
             </a>
+            <a class="dashboard-card" href="create_staff.php">
+                <div class="dashboard-icon"><i class="fas fa-user-plus"></i></div>
+                <div class="dashboard-card-title">Create Staff</div>
+                <div class="dashboard-card-desc">Add staff accounts for the system</div>
+            </a>
         </div>
         <div class="logout-link text-center">
             <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </div>
 </body>
+
 </html>

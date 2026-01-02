@@ -1,13 +1,21 @@
 <?php
 $page_title = 'Energy Usage - Smart Electric Shop';
-require_once 'includes/header.php';
-require_once 'includes/navbar.php';
 
-$products = [];
-$pq = $conn->query('SELECT p.product_id, p.name, eu.wattage FROM Product p LEFT JOIN EnergyUsage eu ON p.product_id = eu.product_id');
-if ($pq) {
-    $products = $pq->fetch_all(MYSQLI_ASSOC);
-}
+// Preset products (standalone). Add `added_date` to mark recent items.
+$products = [
+    ['product_id' => 1, 'name' => 'Ceiling Fan', 'wattage' => 75, 'available_quantity' => 12, 'added_date' => '2026-01-01'],
+    ['product_id' => 2, 'name' => 'LED Bulb 9W', 'wattage' => 9, 'available_quantity' => 200, 'added_date' => '2025-12-20'],
+    ['product_id' => 3, 'name' => 'Refrigerator', 'wattage' => 150, 'available_quantity' => 5, 'added_date' => '2026-01-02'],
+    ['product_id' => 4, 'name' => 'Air Conditioner (1.5 Ton)', 'wattage' => 1500, 'available_quantity' => 3, 'added_date' => '2025-11-15'],
+    ['product_id' => 5, 'name' => 'Washing Machine', 'wattage' => 500, 'available_quantity' => 8, 'added_date' => '2026-01-03']
+];
+
+// Determine recent products (most recent by added_date)
+$recent_products = $products;
+usort($recent_products, function ($a, $b) {
+    return strcmp($b['added_date'], $a['added_date']);
+});
+$recent_products = array_slice($recent_products, 0, 3);
 $result = null;
 $message = '';
 // Default rates (BDT per kWh)
@@ -70,109 +78,182 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-<style>
-    :root {
-        --primary-color: #007bff;
-    }
+<!DOCTYPE html>
+<html lang="en">
 
-    body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #222;
-    }
-
-    .energy-card {
-        background: rgba(255, 255, 255, 0.98);
-        border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-        margin-top: 24px;
-    }
-</style>
-
-<div class="container">
-    <div class="energy-card">
-        <h4>Estimate Energy Consumption</h4>
-        <?php if ($message): ?><div class="alert alert-warning"><?= $message ?></div><?php endif; ?>
-        <form method="POST" class="form-inline mb-4">
-            <div class="form-group mr-2">
-                <label>Product</label>
-                <select name="product_id" class="form-control mx-1" onchange="document.getElementById('wattage').value=this.options[this.selectedIndex].getAttribute('data-wattage')">
-                    <option value="0">Select or enter wattage</option>
-                    <?php foreach ($products as $p): ?>
-                        <option value="<?= $p['product_id'] ?>" data-wattage="<?= $p['wattage'] ?>"><?= $p['name'] ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group mr-2">
-                <label>Quantity</label>
-                <input type="number" name="quantity" class="form-control mx-1" value="1" min="1" />
-            </div>
-            <div class="form-group mr-2">
-                <label>Consumer Type</label>
-                <select name="consumer_type" id="consumer_type" class="form-control mx-1" onchange="onConsumerChange()">
-                    <option value="residential">Residential (default <?= $default_rates['residential'] ?> BDT/kWh)</option>
-                    <option value="business">Business (default <?= $default_rates['business'] ?> BDT/kWh)</option>
-                    <option value="custom">Custom rate</option>
-                </select>
-            </div>
-            <div class="form-group mr-2">
-                <label>Rate (BDT/kWh)</label>
-                <input type="number" name="rate" id="rate" class="form-control mx-1" value="<?= htmlspecialchars($_POST['rate'] ?? $default_rates['residential']) ?>" step="0.01" />
-            </div>
-            <div class="form-group mr-2">
-                <label>Wattage (W)</label>
-                <input type="number" name="wattage" id="wattage" class="form-control mx-1" value="" step="0.01" required />
-            </div>
-            <div class="form-group mr-2">
-                <label>Voltage (V)</label>
-                <input type="number" name="voltage" id="voltage" class="form-control mx-1" value="220" step="1" />
-            </div>
-            <div class="form-group mr-2">
-                <label>Hours/day</label>
-                <input type="number" name="hours_used" class="form-control mx-1" step="0.01" required />
-            </div>
-            <button type="submit" class="btn btn-primary">Calculate</button>
-        </form>
-        <?php if ($result): ?>
-            <div class="alert alert-info col-md-8">
-                <strong>Total Wattage:</strong> <?= htmlspecialchars($result['total_watt']) ?> W<br>
-                <strong>Quantity:</strong> <?= htmlspecialchars($result['quantity']) ?> units<br>
-                <strong>Hours/day:</strong> <?= htmlspecialchars($result['hours_used']) ?> hrs<br>
-                <strong>Estimated Daily Energy:</strong> <b><?= $result['energy_daily'] ?> kWh</b><br>
-                <strong>Estimated Monthly Energy:</strong> <b><?= $result['energy_monthly'] ?> kWh</b><br>
-                <strong>Estimated Yearly Energy:</strong> <b><?= $result['energy_yearly'] ?> kWh</b><br>
-                <strong>Daily Cost:</strong> <b><?= $result['cost_daily'] ?> BDT</b><br>
-                <strong>Monthly Cost:</strong> <b><?= $result['cost_monthly'] ?> BDT</b><br>
-                <strong>Yearly Cost:</strong> <b><?= $result['cost_yearly'] ?> BDT</b><br>
-                <strong>Estimated Current:</strong> <b><?= $result['amps'] ?> A</b> at <?= htmlspecialchars($result['voltage']) ?> V<br>
-                <strong>Suggested Breaker Size:</strong> <b><?= $result['suggested_breaker'] ?> A</b>
-            </div>
-        <?php endif; ?>
-        <a href="index.php" class="btn btn-secondary mt-2">Back to Home</a>
-    </div>
-</div>
-<script>
-    // Sync rate input with consumer type selection
-    const defaultRates = <?= json_encode($default_rates) ?>;
-
-    function onConsumerChange() {
-        const sel = document.getElementById('consumer_type');
-        const rateInput = document.getElementById('rate');
-        if (!sel || !rateInput) return;
-        if (sel.value === 'custom') {
-            rateInput.disabled = false;
-            rateInput.focus();
-        } else if (defaultRates.hasOwnProperty(sel.value)) {
-            rateInput.value = defaultRates[sel.value];
-            rateInput.disabled = true;
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Energy Usage - Smart Electric Shop</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary-color: #007bff;
         }
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        onConsumerChange();
-    });
-</script>
-</body>
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #222;
+        }
+
+        .energy-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            margin-top: 24px;
+        }
+    </style>
+
+    <div class="container">
+        <div class="energy-card">
+            <h4>Estimate Energy Consumption</h4>
+            <?php if ($message): ?><div class="alert alert-warning"><?= $message ?></div><?php endif; ?>
+            <form method="POST" class="form-inline mb-4">
+                <div class="w-100 mb-2">
+                    <label class="mr-2">Search Products</label>
+                    <input type="search" id="product_search" class="form-control" placeholder="Search by name or wattage..." style="max-width:420px;" />
+                    <small class="text-muted ml-2">Or pick from recently added:</small>
+                    <?php foreach ($recent_products as $rp): ?>
+                        <button type="button" class="btn btn-link btn-sm recent-prod" data-id="<?= $rp['product_id'] ?>" data-watt="<?= $rp['wattage'] ?>"><?= htmlspecialchars($rp['name']) ?></button>
+                    <?php endforeach; ?>
+                </div>
+                <div class="form-group mr-2">
+                    <label>Product</label>
+                    <select name="product_id" id="product_select" class="form-control mx-1" onchange="onProductChange()">
+                        <option value="0">Select or enter wattage</option>
+                        <?php foreach ($products as $p): ?>
+                            <option value="<?= $p['product_id'] ?>" data-wattage="<?= $p['wattage'] ?>" data-name="<?= htmlspecialchars($p['name'], ENT_QUOTES) ?>"><?= $p['name'] ?> (<?= $p['wattage'] ?>W)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group mr-2">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity" class="form-control mx-1" value="1" min="1" />
+                </div>
+                <div class="form-group mr-2">
+                    <label>Consumer Type</label>
+                    <select name="consumer_type" id="consumer_type" class="form-control mx-1" onchange="onConsumerChange()">
+                        <option value="residential">Residential (default <?= $default_rates['residential'] ?> BDT/kWh)</option>
+                        <option value="business">Business (default <?= $default_rates['business'] ?> BDT/kWh)</option>
+                        <option value="custom">Custom rate</option>
+                    </select>
+                </div>
+                <div class="form-group mr-2">
+                    <label>Rate (BDT/kWh)</label>
+                    <input type="number" name="rate" id="rate" class="form-control mx-1" value="<?= htmlspecialchars($_POST['rate'] ?? $default_rates['residential']) ?>" step="0.01" />
+                </div>
+                <div class="form-group mr-2">
+                    <label>Wattage (W)</label>
+                    <input type="number" name="wattage" id="wattage" class="form-control mx-1" value="" step="0.01" required />
+                </div>
+                <div class="form-group mr-2">
+                    <label>Voltage (V)</label>
+                    <input type="number" name="voltage" id="voltage" class="form-control mx-1" value="220" step="1" />
+                </div>
+                <div class="form-group mr-2">
+                    <label>Hours/day</label>
+                    <input type="number" name="hours_used" class="form-control mx-1" step="0.01" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Calculate</button>
+            </form>
+            <?php if ($result): ?>
+                <div class="alert alert-info col-md-8">
+                    <strong>Total Wattage:</strong> <?= htmlspecialchars($result['total_watt']) ?> W<br>
+                    <strong>Quantity:</strong> <?= htmlspecialchars($result['quantity']) ?> units<br>
+                    <strong>Hours/day:</strong> <?= htmlspecialchars($result['hours_used']) ?> hrs<br>
+                    <strong>Estimated Daily Energy:</strong> <b><?= $result['energy_daily'] ?> kWh</b><br>
+                    <strong>Estimated Monthly Energy:</strong> <b><?= $result['energy_monthly'] ?> kWh</b><br>
+                    <strong>Estimated Yearly Energy:</strong> <b><?= $result['energy_yearly'] ?> kWh</b><br>
+                    <strong>Daily Cost:</strong> <b><?= $result['cost_daily'] ?> BDT</b><br>
+                    <strong>Monthly Cost:</strong> <b><?= $result['cost_monthly'] ?> BDT</b><br>
+                    <strong>Yearly Cost:</strong> <b><?= $result['cost_yearly'] ?> BDT</b><br>
+                    <strong>Estimated Current:</strong> <b><?= $result['amps'] ?> A</b> at <?= htmlspecialchars($result['voltage']) ?> V<br>
+                    <strong>Suggested Breaker Size:</strong> <b><?= $result['suggested_breaker'] ?> A</b>
+                </div>
+            <?php endif; ?>
+            <a href="index.php" class="btn btn-secondary mt-2">Back to Home</a>
+        </div>
+    </div>
+    <script>
+        // Sync rate input with consumer type selection
+        const defaultRates = <?= json_encode($default_rates) ?>;
+
+        function onConsumerChange() {
+            const sel = document.getElementById('consumer_type');
+            const rateInput = document.getElementById('rate');
+            if (!sel || !rateInput) return;
+            if (sel.value === 'custom') {
+                rateInput.disabled = false;
+                rateInput.focus();
+            } else if (defaultRates.hasOwnProperty(sel.value)) {
+                rateInput.value = defaultRates[sel.value];
+                rateInput.disabled = true;
+            }
+        }
+
+        function onProductChange() {
+            const sel = document.getElementById('product_select');
+            const wattInput = document.getElementById('wattage');
+            if (!sel || !wattInput) return;
+            const opt = sel.options[sel.selectedIndex];
+            const w = opt ? opt.getAttribute('data-wattage') || opt.getAttribute('data-watt') : '';
+            if (w) wattInput.value = w;
+        }
+
+        // Search/filter products in select
+        function setupProductSearch() {
+            const search = document.getElementById('product_search');
+            const select = document.getElementById('product_select');
+            if (!search || !select) return;
+            search.addEventListener('input', function() {
+                const q = this.value.trim().toLowerCase();
+                for (let i = 0; i < select.options.length; i++) {
+                    const opt = select.options[i];
+                    if (opt.value === '0') {
+                        opt.hidden = false;
+                        continue;
+                    }
+                    const name = (opt.getAttribute('data-name') || opt.text).toLowerCase();
+                    const watt = (opt.getAttribute('data-wattage') || '').toLowerCase();
+                    opt.hidden = q !== '' && !(name.indexOf(q) !== -1 || watt.indexOf(q) !== -1);
+                }
+                // If there's exactly one visible non-zero option, auto-select it
+                let visibleCount = 0,
+                    lastVisible = null;
+                for (let i = 0; i < select.options.length; i++) {
+                    const o = select.options[i];
+                    if (!o.hidden && o.value !== '0') {
+                        visibleCount++;
+                        lastVisible = o;
+                    }
+                }
+                if (visibleCount === 1 && lastVisible) {
+                    select.value = lastVisible.value;
+                    onProductChange();
+                }
+            });
+
+            // recent product buttons
+            document.querySelectorAll('.recent-prod').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const watt = this.getAttribute('data-watt');
+                    const select = document.getElementById('product_select');
+                    if (select) select.value = id;
+                    const wattInput = document.getElementById('wattage');
+                    if (wattInput) wattInput.value = watt;
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            onConsumerChange();
+            setupProductSearch();
+        });
+    </script>
+    </body>
 
 </html>

@@ -1,105 +1,99 @@
--- Smart Electric Shop Management System - SQL Schema
-
--- Admin Tables
+-- Main admin
 CREATE TABLE Main_Admin (
     main_id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50)
 );
 
+-- Admins
 CREATE TABLE Admin (
     admin_id INT PRIMARY KEY AUTO_INCREMENT,
-    main_id INT,
-    name VARCHAR(50),
-    email VARCHAR(100) UNIQUE,
-    password VARCHAR(255),
-    phone_number VARCHAR(20),
-    FOREIGN KEY (main_id) REFERENCES Main_Admin(main_id) ON DELETE SET NULL
+    main_id INT DEFAULT NULL,
+    name VARCHAR(50) DEFAULT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(20) DEFAULT NULL,
+    FOREIGN KEY (main_id) REFERENCES Main_Admin(main_id)
 );
 
+-- Staff members
 CREATE TABLE Staff (
     staff_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50),
-    email VARCHAR(100),
-    password VARCHAR(255),
-    phone_number VARCHAR(20),
-    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
+    name VARCHAR(50) DEFAULT NULL,
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(20) DEFAULT NULL
 );
 
-
--- User & Reward Points
-CREATE TABLE User (
+-- Users
+CREATE TABLE `User` (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50),
-    email VARCHAR(100) UNIQUE,
-    password VARCHAR(255),
-    phone_number VARCHAR(20),
-    order_id INT,
-    warranty_id INT
+    name VARCHAR(50) DEFAULT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(20) DEFAULT NULL,
+    order_id INT DEFAULT NULL,
+    warranty_id INT DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE current_timestamp()
 );
 
+-- Reward points
 CREATE TABLE RewardPoints (
     points_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
+    user_id INT DEFAULT NULL,
     points INT DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES User(user_id)
+    FOREIGN KEY (user_id) REFERENCES `User`(user_id)
 );
 
-CREATE TABLE Handles (
-    points_id INT,
-    admin_id INT,
-    PRIMARY KEY (points_id, admin_id),
-    FOREIGN KEY (points_id) REFERENCES RewardPoints(points_id),
-    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
-);
-
--- Product, BulkPricing, and Energy
+-- Products and related
 CREATE TABLE Product (
     product_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100),
-    description TEXT,
-    price DECIMAL(10,2),
-    warranty_duration INT,
-    available_quantity INT,
+    name VARCHAR(100) DEFAULT NULL,
+    description TEXT DEFAULT NULL,
+    price DECIMAL(10,2) DEFAULT NULL,
+    warranty_duration INT DEFAULT NULL,
+    available_quantity INT DEFAULT NULL,
     reward_points INT DEFAULT 0,
-    admin_id INT,
-    warranty_id INT,
+    images TEXT DEFAULT NULL,
+    admin_id INT DEFAULT NULL,
+    warranty_id INT DEFAULT NULL,
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
 
 CREATE TABLE BulkPricing (
     product_no INT PRIMARY KEY AUTO_INCREMENT,
-    product_id INT,
-    min_quantity INT,
-    discount_percentage DECIMAL(5,2),
+    product_id INT DEFAULT NULL,
+    min_quantity INT DEFAULT NULL,
+    discount_percentage DECIMAL(5,2) DEFAULT NULL,
     FOREIGN KEY (product_id) REFERENCES Product(product_id)
 );
 
 CREATE TABLE EnergyUsage (
     energy_id INT PRIMARY KEY AUTO_INCREMENT,
-    product_id INT,
-    wattage INT,
-    hours_used INT,
-    estimated_energy DECIMAL(10,2),
+    product_id INT DEFAULT NULL,
+    wattage INT DEFAULT NULL,
+    hours_used INT DEFAULT NULL,
+    estimated_energy DECIMAL(10,2) DEFAULT NULL,
     FOREIGN KEY (product_id) REFERENCES Product(product_id)
 );
 
--- Order/Cart System
+-- Orders and items
 CREATE TABLE `Order` (
     order_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    order_date DATETIME,
-    payment_status VARCHAR(30),
-    total_amount DECIMAL(10,2),
-    discount DECIMAL(10,2),
-    FOREIGN KEY (user_id) REFERENCES User(user_id)
+    user_id INT DEFAULT NULL,
+    order_date DATETIME DEFAULT NULL,
+    payment_status VARCHAR(30) DEFAULT NULL,
+    total_amount DECIMAL(10,2) DEFAULT NULL,
+    discount DECIMAL(10,2) DEFAULT NULL,
+    FOREIGN KEY (user_id) REFERENCES `User`(user_id)
 );
 
 CREATE TABLE OrderItem (
     item_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT,
-    product_id INT,
-    quantity INT,
-    price DECIMAL(10,2),
+    order_id INT DEFAULT NULL,
+    product_id INT DEFAULT NULL,
+    quantity INT DEFAULT NULL,
+    price DECIMAL(10,2) DEFAULT NULL,
     FOREIGN KEY (order_id) REFERENCES `Order`(order_id),
     FOREIGN KEY (product_id) REFERENCES Product(product_id)
 );
@@ -107,52 +101,21 @@ CREATE TABLE OrderItem (
 -- Warranty & Service
 CREATE TABLE Warranty (
     warranty_id INT PRIMARY KEY AUTO_INCREMENT,
-    warranty_duration INT,
-    purchase_date DATE
+    warranty_duration INT DEFAULT NULL,
+    purchase_date DATE DEFAULT NULL
 );
 
-CREATE TABLE CanManage (
-    warranty_id INT,
-    admin_id INT,
-    PRIMARY KEY (warranty_id, admin_id),
-    FOREIGN KEY (warranty_id) REFERENCES Warranty(warranty_id),
-    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
-);
 
 CREATE TABLE ServiceRequest (
     request_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    warranty_id INT,
-    issue TEXT,
-    status VARCHAR(30),
-    FOREIGN KEY (user_id) REFERENCES User(user_id),
+    user_id INT DEFAULT NULL,
+    warranty_id INT DEFAULT NULL,
+    issue TEXT DEFAULT NULL,
+    status VARCHAR(30) DEFAULT NULL,
+    FOREIGN KEY (user_id) REFERENCES `User`(user_id),
     FOREIGN KEY (warranty_id) REFERENCES Warranty(warranty_id)
 );
 
-CREATE TABLE DealsWith (
-    request_id INT,
-    admin_id INT,
-    PRIMARY KEY (request_id, admin_id),
-    FOREIGN KEY (request_id) REFERENCES ServiceRequest(request_id),
-    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
-);
-
--- Access Control/Misc. Relationships
-CREATE TABLE CanGiveAccess (
-    user_id INT,
-    main_id INT,
-    PRIMARY KEY (user_id, main_id),
-    FOREIGN KEY (user_id) REFERENCES User(user_id),
-    FOREIGN KEY (main_id) REFERENCES Main_Admin(main_id)
-);
-
-CREATE TABLE Conducts (
-    item_id INT,
-    admin_id INT,
-    PRIMARY KEY (item_id, admin_id),
-    FOREIGN KEY (item_id) REFERENCES OrderItem(item_id),
-    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
-);
 
 CREATE TABLE CanCheckOrder (
     order_id INT,
@@ -162,10 +125,17 @@ CREATE TABLE CanCheckOrder (
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
 
--- Insert Initial Data
--- Create default Main Admin
-INSERT INTO Main_Admin (main_id, name) VALUES (1, 'System Administrator');
-
-INSERT INTO Admin (main_id, name, email, password, phone_number) 
-VALUES (1, 'Administrator', 'admin@smartelectric.com', 'admin123', '1234567890');
+CREATE TABLE ContactMessages (
+    message_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT DEFAULT NULL,
+    name VARCHAR(100) DEFAULT NULL,
+    email VARCHAR(150) DEFAULT NULL,
+    subject VARCHAR(255) DEFAULT NULL,
+    message TEXT DEFAULT NULL,
+    status VARCHAR(30) DEFAULT 'Open',
+    response_text TEXT DEFAULT NULL,
+    responded_by INT DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES `User`(user_id)
+);
 

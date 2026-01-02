@@ -38,6 +38,25 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param('ssdiii', $product_name, $description, $price, $warranty_duration, $available_quantity, $admin_id);
 
 if ($stmt->execute()) {
+    $product_id = $conn->insert_id;
+
+    // create warranty and link to product
+    if (!empty($warranty_duration)) {
+        $wst = $conn->prepare('INSERT INTO Warranty (warranty_duration, purchase_date) VALUES (?, NULL)');
+        if ($wst) {
+            $wst->bind_param('i', $warranty_duration);
+            $wst->execute();
+            $wid = $conn->insert_id;
+            $wst->close();
+            $ust = $conn->prepare('UPDATE Product SET warranty_id = ? WHERE product_id = ?');
+            if ($ust) {
+                $ust->bind_param('ii', $wid, $product_id);
+                $ust->execute();
+                $ust->close();
+            }
+        }
+    }
+
     echo "<h3 style='color: green;'>✓ Product Added Successfully!</h3>";
     echo "<p><strong>Product Name:</strong> " . htmlspecialchars($product_name) . "</p>";
     echo "<p><strong>Price:</strong> ৳ " . number_format($price, 2) . "</p>";

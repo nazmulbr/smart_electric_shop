@@ -49,6 +49,22 @@ if ($stmt) {
         echo "Product ID: {$product_id}<br>";
         echo "Price: ৳ {$price}<br>";
         echo "Category: {$category}<br><br>";
+        // Create warranty for this product and link it
+        if (!empty($warranty_duration)) {
+            $wst = $conn->prepare('INSERT INTO Warranty (warranty_duration, purchase_date) VALUES (?, NULL)');
+            if ($wst) {
+                $wst->bind_param('i', $warranty_duration);
+                $wst->execute();
+                $wid = $conn->insert_id;
+                $wst->close();
+                $ust = $conn->prepare('UPDATE Product SET warranty_id = ? WHERE product_id = ?');
+                if ($ust) {
+                    $ust->bind_param('ii', $wid, $product_id);
+                    $ust->execute();
+                    $ust->close();
+                }
+            }
+        }
         echo "<a href='index.php'>View on Homepage</a>";
     } else {
         echo "Error adding product: " . $conn->error;
