@@ -18,7 +18,8 @@ $create = "CREATE TABLE IF NOT EXISTS ContactMessages (
     status VARCHAR(30) DEFAULT 'Open',
     response_text TEXT NULL,
     responded_by INT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(user_id)
 )";
 $conn->query($create);
 

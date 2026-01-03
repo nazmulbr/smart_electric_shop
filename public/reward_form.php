@@ -11,6 +11,17 @@ if (!$check_column || $check_column->num_rows == 0) {
     $conn->query("ALTER TABLE Product ADD COLUMN reward_points INT DEFAULT 0 AFTER available_quantity");
 }
 
+// Ensure Handles table exists (tracks which admin handled a points change)
+$createHandles = "CREATE TABLE IF NOT EXISTS Handles (
+    handle_id INT PRIMARY KEY AUTO_INCREMENT,
+    points_id INT NOT NULL,
+    admin_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (points_id) REFERENCES RewardPoints(points_id),
+    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
+);";
+$conn->query($createHandles);
+
 $type = isset($_GET['type']) ? $_GET['type'] : 'user'; // 'user' or 'product'
 $isEdit = isset($_GET['edit']);
 $isAdjust = isset($_GET['adjust']);
@@ -21,7 +32,7 @@ $action_type = 'set'; // 'set', 'add', 'reduce'
 // Load existing data for edit or adjust
 if ($isEdit || $isAdjust) {
     $id = intval($_GET['edit'] ?? $_GET['adjust']);
-    
+
     if ($type === 'user') {
         $stmt = $conn->prepare('SELECT * FROM RewardPoints WHERE points_id=?');
         $stmt->bind_param('i', $id);
@@ -55,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = intval($_POST['user_id'] ?? 0);
     $product_id = intval($_POST['product_id'] ?? 0);
     $points_value = intval($_POST['points'] ?? 0);
-    
+
     if ($type === 'user') {
         if ($user_id && isset($points_value)) {
             // Get current points
@@ -84,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
             }
-            
+
             // Calculate new points based on action
             if ($action_type === 'add') {
                 $new_points = $current + $points_value;
@@ -93,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else { // set
                 $new_points = $points_value;
             }
-            
+
             if ($points_id) {
                 $stmt = $conn->prepare('UPDATE RewardPoints SET points=? WHERE points_id=?');
                 $stmt->bind_param('ii', $new_points, $points_id);
@@ -103,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param('ii', $user_id, $new_points);
                 $stmt->execute();
             }
-            
+
             // Link to admin (Handles table)
             $admin_id = $_SESSION['user_id'];
             $check_handle = $conn->prepare('SELECT points_id FROM Handles WHERE points_id=? AND admin_id=?');
@@ -121,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $insert_handle->bind_param('ii', $points_id_for_handle, $admin_id);
                 $insert_handle->execute();
             }
-            
+
             header('Location: manage_rewards.php?tab=users');
             exit;
         } else {
@@ -138,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($row = $result->fetch_assoc()) {
                 $current = intval($row['reward_points']);
             }
-            
+
             // Calculate new points based on action
             if ($action_type === 'add') {
                 $new_points = $current + $points_value;
@@ -147,11 +158,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else { // set
                 $new_points = $points_value;
             }
-            
+
             $stmt = $conn->prepare('UPDATE Product SET reward_points=? WHERE product_id=?');
             $stmt->bind_param('ii', $new_points, $product_id);
             $stmt->execute();
-            
+
             header('Location: manage_rewards.php?tab=products');
             exit;
         } else {
@@ -189,17 +200,17 @@ $page_title = ($isEdit ? 'Edit' : ($isAdjust ? 'Adjust' : 'Add')) . ' ' . ucfirs
             </div>
             <div class="card-body">
                 <?php if ($message): ?><div class="alert alert-danger"><?= htmlspecialchars($message) ?></div><?php endif; ?>
-                
+
                 <?php if ($isAdjust && $current_points !== ''): ?>
                     <div class="alert alert-info">
                         <strong>Current Points:</strong> <?= htmlspecialchars($current_points) ?>
                     </div>
                 <?php endif; ?>
-                
+
                 <form method="POST">
                     <input type="hidden" name="type" value="<?= htmlspecialchars($type) ?>" />
                     <input type="hidden" name="points_id" value="<?= htmlspecialchars($points_id) ?>" />
-                    
+
                     <?php if ($type === 'user'): ?>
                         <div class="form-group">
                             <label>User</label>
@@ -231,7 +242,7 @@ $page_title = ($isEdit ? 'Edit' : ($isAdjust ? 'Adjust' : 'Add')) . ' ' . ucfirs
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
-                    
+
                     <div class="form-group">
                         <label>Action Type</label>
                         <select name="action_type" class="form-control" id="action_type" required>
@@ -243,7 +254,7 @@ $page_title = ($isEdit ? 'Edit' : ($isAdjust ? 'Adjust' : 'Add')) . ' ' . ucfirs
                             <span id="action_hint">Set the exact number of points</span>
                         </small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label>Points Value</label>
                         <input type="number" name="points" value="<?= htmlspecialchars($points) ?>" class="form-control" min="0" required />
@@ -251,7 +262,7 @@ $page_title = ($isEdit ? 'Edit' : ($isAdjust ? 'Adjust' : 'Add')) . ' ' . ucfirs
                             Enter the number of points to set
                         </small>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-success">
                         <?php
                         if ($isAdjust) {
@@ -267,13 +278,13 @@ $page_title = ($isEdit ? 'Edit' : ($isAdjust ? 'Adjust' : 'Add')) . ' ' . ucfirs
             </div>
         </div>
     </div>
-    
+
     <script>
         document.getElementById('action_type').addEventListener('change', function() {
             const actionType = this.value;
             const actionHint = document.getElementById('action_hint');
             const pointsHint = document.getElementById('points_hint');
-            
+
             if (actionType === 'set') {
                 actionHint.textContent = 'Set the exact number of points';
                 pointsHint.textContent = 'Enter the exact number of points to set';

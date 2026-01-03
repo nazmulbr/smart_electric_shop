@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = $_POST['subject'] ?? '';
     $message_text = $_POST['message'] ?? '';
     if ($name && $email && $subject && $message_text) {
-        // Ensure ContactMessages table exists
+        // Ensure ContactMessages table exists (with foreign key to User)
         $create = "CREATE TABLE IF NOT EXISTS ContactMessages (
             message_id INT PRIMARY KEY AUTO_INCREMENT,
             user_id INT NULL,
@@ -25,7 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             status VARCHAR(30) DEFAULT 'Open',
             response_text TEXT NULL,
             responded_by INT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES User(user_id)
         )";
         $conn->query($create);
 

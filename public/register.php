@@ -59,9 +59,15 @@ if ($conn->connect_error) {
                             if (!$insert_stmt) throw new Exception("Prepare failed (insert user): " . $conn->error);
                             $insert_stmt->bind_param('ssss', $name, $email, $hashed, $phone_number);
                             if ($insert_stmt->execute()) {
-                                $register_msg = 'Registration successful! <a href="login.php">Login Now</a>';
-                                // Clear form data
-                                $name = $email = $phone_number = '';
+                                // Get the new user's id and log them in
+                                $new_user_id = $conn->insert_id;
+                                $_SESSION['user_id'] = $new_user_id;
+                                $_SESSION['role'] = 'user';
+                                $_SESSION['email'] = $email;
+                                $_SESSION['name'] = $name;
+                                // Redirect to homepage logged-in
+                                header('Location: index.php?login_success=1');
+                                exit;
                             } else {
                                 // Detailed DB error
                                 $register_err = showDbError($conn, "User Registration");
