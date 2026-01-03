@@ -37,7 +37,7 @@ $requests = $requests ? $requests->fetch_all(MYSQLI_ASSOC) : [];
                 <tr>
                     <th>ID</th>
                     <th>User</th>
-                    <th>Warranty Purchase</th>
+                    <th></th>
                     <th>Issue</th>
                     <th>Status</th>
                     <th>Update</th>

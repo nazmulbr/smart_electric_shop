@@ -1,12 +1,10 @@
 <?php
 // Common Header with Error Handling
-// Include this at the top of your pages: require_once 'includes/header.php';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
 // Include error handler
 require_once '../config/error_handler.php';
 require_once '../config/db.php';
