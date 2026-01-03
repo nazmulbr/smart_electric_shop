@@ -70,7 +70,11 @@ $stmt->close();
                     <li class="list-group-item <?= $cls ?>" data-id="<?= $n['notifications_id'] ?>">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <?= htmlspecialchars($n['message']) ?><br>
+                                <?php if (!empty($n['contact_message_id'])): ?>
+                                    <a class="notif-link" href="contact_view.php?message_id=<?= intval($n['contact_message_id']) ?>&notif_id=<?= intval($n['notifications_id']) ?>"><?= htmlspecialchars($n['message']) ?></a><br>
+                                <?php else: ?>
+                                    <span><?= htmlspecialchars($n['message']) ?></span><br>
+                                <?php endif; ?>
                                 <small class="text-muted"><?= $n['created_at'] ?></small>
                             </div>
                             <div>
@@ -99,6 +103,19 @@ $stmt->close();
                             }
                             // allow navigation to proceed (server will mark read and reload)
                         });
+                    });
+
+                    // Make the whole list item clickable if it contains a link to the contact view
+                    document.querySelectorAll('li.list-group-item').forEach(function(li) {
+                        var a = li.querySelector('a.notif-link');
+                        if (a) {
+                            li.style.cursor = 'pointer';
+                            li.addEventListener('click', function(e) {
+                                // avoid triggering when clicking the 'Mark read' button
+                                if (e.target && e.target.classList && e.target.classList.contains('mark-read-btn')) return;
+                                window.location = a.href;
+                            });
+                        }
                     });
                 });
             </script>

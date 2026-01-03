@@ -28,6 +28,7 @@ $createNot = "CREATE TABLE IF NOT EXISTS Notifications (
     user_id INT,
     message TEXT,
     warranty_id INT NULL,
+    contact_message_id INT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_read TINYINT DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES User(user_id)
@@ -64,10 +65,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         // If the message was from a logged-in user, create a notification for them
         if (!empty($user_id)) {
-            $notif_msg = "Support has responded to your message" . (!empty($subject) ? (": $subject") : '') . ".\n\n" . substr($response, 0, 1000);
-            $ins = $conn->prepare('INSERT INTO Notifications (user_id, message) VALUES (?, ?)');
+            $notif_msg = "Support has responded to your message" . (!empty($subject) ? (": $subject") : '') . ".";
+            // Insert notification and link it to the contact message id so user can be taken directly to the reply
+            $ins = $conn->prepare('INSERT INTO Notifications (user_id, message, contact_message_id) VALUES (?, ?, ?)');
             if ($ins) {
-                $ins->bind_param('is', $user_id, $notif_msg);
+                $ins->bind_param('isi', $user_id, $notif_msg, $mid);
                 $ins->execute();
                 $ins->close();
             }

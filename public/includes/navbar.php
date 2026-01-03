@@ -6,6 +6,9 @@ $unread_notifications = 0;
 if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'user') {
     require_once __DIR__ . '/../../config/db.php';
     $uid = $_SESSION['user_id'];
+    // If the user is currently viewing notifications or viewing a contact reply, don't show the unread badge
+    $current_script = basename($_SERVER['SCRIPT_NAME'] ?? '');
+    $suppress_badge = in_array($current_script, ['notifications.php', 'contact_view.php']);
     // Only query Notifications if the table exists to avoid uncaught exceptions
     $tbl_check = $conn->query("SHOW TABLES LIKE 'Notifications'");
     if ($tbl_check && $tbl_check->num_rows > 0) {
@@ -17,6 +20,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'user') {
             $nstmt->fetch();
             $nstmt->close();
         }
+        if (!empty($suppress_badge)) $unread_notifications = 0;
     }
 }
 ?>
